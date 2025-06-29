@@ -1,11 +1,21 @@
 const express = require('express');
+const cors = require('cors');
+const { pool } = require('./config/db'); // Import the pool from db.js
 const app = express();
+const userRoutes = require("./routes/User");
 
-app.get('/', (req, res) => {
-    res.send('Hello, World!');
-});
-console.log('Hello');
 
-app.listen(3000, () => {
-    console.log('Server running on http://localhost:3000');
+app.use(cors());
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use("/user", userRoutes);
+
+
+
+
+// Start the Express server
+app.listen(3001, () => {
+  console.log('Server running on http://localhost:3001');
 });
+
+

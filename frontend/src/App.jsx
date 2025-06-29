@@ -1,6 +1,8 @@
 // src/App.jsx
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
+
 import AuthLayout from './layouts/AuthLayout';
+import DashboardLayout from './layouts/DashboardLayout';
 import Login from './pages/Login';
 import VerifyEmail from './pages/VerifyEmail';
 import CreateAccount from './pages/CreateAccount';
@@ -32,9 +34,13 @@ const App = () => {
    <Route path="/update-password" element={<PasswordUpdated/>} />
    <Route path='/updated-creation' element={<UpdatedCreation/>}/>
  </Route>
- 
-<Route element={<MainLayout />}>
+
+<Route element={<DashboardLayout />}>
   <Route path="/" element={<HomePage />} />
+</Route>
+
+<Route element={<MainLayout />}>
+  
   <Route path='/selected-opportunity' element={<EventPage/>}/>
   <Route path='/my-events' element={<MyEvents/>}/>
   <Route path='/volunteer-profile' element={<VolunteerProfile/>}/>
