@@ -1,30 +1,29 @@
-const { pool } = require('../config/database');
+const { promisePool } = require('../config/db'); 
 
 class User {
-  static async create({ userName, email, password, userType, phoneNumber, location }) {
-    const [result] = await pool.query(
+  static async create({ userName, email, password, phoneNumber, location, userType }) {
+    const [result] = await promisePool.query(
       `INSERT INTO users 
-       (userName, email, password, userType, phoneNumber, location) 
+       (userName, email, password, phoneNumber, location, userType) 
        VALUES (?, ?, ?, ?, ?, ?)`,
-      [userName, email, password, userType, phoneNumber, location]
+      [userName, email, password, phoneNumber, location, userType]
     );
     return result.insertId;
   }
 
   static async findByEmail(email) {
-    const [rows] = await pool.query(
+    const [rows] = await promisePool.query(
       'SELECT * FROM users WHERE email = ?',
       [email]
     );
     return rows[0];
   }
 
-  static async findById(id) {
-    const [rows] = await pool.query(
-      'SELECT * FROM users WHERE id = ?',
-      [id]
+  static async verifyEmail(userId) {
+    await promisePool.query(
+      'UPDATE users SET isVerified = TRUE WHERE id = ?',
+      [userId]
     );
-    return rows[0];
   }
 }
 

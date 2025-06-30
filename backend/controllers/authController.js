@@ -1,19 +1,18 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const { pool } = require('../config/db');
+const { promisePool } = require('../config/db');
+const User = require('../models/User');
+const Volunteer = require('../models/Volunteer');
+const Organizer = require('../models/Organizer');
 const { sendVerificationEmail } = require('../services/emailService');
 
 exports.register = async (req, res) => {
   const { userName, email, password, phoneNumber, location, userType } = req.body;
-
+  
   try {
-    // Check if user exists
-    const [existingUser] = await pool.query(
-      'SELECT id FROM users WHERE email = ?',
-      [email]
-    );
-
-    if (existingUser.length > 0) {
+    // Check if email exists
+    const user = await User.findByEmail(email);
+    if (user) {
       return res.status(400).json({ 
         success: false,
         message: 'Email already exists' 
@@ -25,29 +24,23 @@ exports.register = async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, salt);
 
     // Start transaction
-    await pool.query('START TRANSACTION');
+    await promisePool.query('START TRANSACTION');
 
     // Create user
-    const [userResult] = await pool.query(
-      `INSERT INTO users 
-      (userName, email, password, phoneNumber, location, userType) 
-      VALUES (?, ?, ?, ?, ?, ?)`,
-      [userName, email, hashedPassword, phoneNumber, location, userType]
-    );
-
-    const userId = userResult.insertId;
+    const userId = await User.create({
+      userName,
+      email,
+      password: hashedPassword,
+      phoneNumber: userType === 'volunteer' ? phoneNumber : null,
+      location: userType === 'volunteer' ? location : null,
+      userType
+    });
 
     // Create specific profile
     if (userType === 'volunteer') {
-      await pool.query(
-        'INSERT INTO volunteers (userId) VALUES (?)',
-        [userId]
-      );
+      await Volunteer.createProfile(userId);
     } else {
-      await pool.query(
-        'INSERT INTO organizers (userId, organizationName) VALUES (?, ?)',
-        [userId, userName]
-      );
+      await Organizer.createProfile(userId, userName);
     }
 
     // Generate verification token
@@ -61,7 +54,7 @@ exports.register = async (req, res) => {
     await sendVerificationEmail(email, verificationToken);
 
     // Commit transaction
-    await pool.query('COMMIT');
+    await promisePool.query('COMMIT');
 
     res.status(201).json({
       success: true,
@@ -69,11 +62,36 @@ exports.register = async (req, res) => {
     });
 
   } catch (error) {
-    await pool.query('ROLLBACK');
+    await promisePool.query('ROLLBACK');
     console.error('Registration error:', error);
     res.status(500).json({
       success: false,
       message: 'Registration failed. Please try again.'
+    });
+  }
+};
+
+exports.verifyEmail = async (req, res) => {
+  const { token } = req.body;
+  
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    await User.verifyEmail(decoded.id);
+    
+    res.json({
+      success: true,
+      message: 'Email verified successfully'
+    });
+  } catch (error) {
+    if (error.name === 'TokenExpiredError') {
+      return res.status(400).json({
+        success: false,
+        message: 'Verification link has expired'
+      });
+    }
+    res.status(400).json({
+      success: false,
+      message: 'Invalid verification token'
     });
   }
 };

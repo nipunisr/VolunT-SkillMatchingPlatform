@@ -7,11 +7,11 @@ exports.validateRegister = [
     .isLength({ min: 6 })
     .withMessage('Password must be at least 6 characters'),
   body('phoneNumber')
-    .if(body('userType').equals('volunteer'))
+    .if((value, { req }) => req.body.userType === 'volunteer')
     .notEmpty()
     .withMessage('Phone number is required'),
   body('location')
-    .if(body('userType').equals('volunteer'))
+    .if((value, { req }) => req.body.userType === 'volunteer')
     .notEmpty()
     .withMessage('Location is required'),
 

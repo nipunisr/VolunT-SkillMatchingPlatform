@@ -1,10 +1,10 @@
-//require('dotenv').config();
 const path = require('path');
 require('dotenv').config({ path: path.join(__dirname, '..', '.env') });
 
 const mysql = require('mysql2');
+const util = require('util');
 
-// Create a connection pool using Aiven MySQL connection details
+// ✅ First create the pool
 const pool = mysql.createPool({
   host: process.env.DB_HOST,
   user: process.env.DB_USER,
@@ -16,14 +16,17 @@ const pool = mysql.createPool({
   queueLimit: 0,
 });
 
-// Log connection success or failure
+// ✅ Then promisify query AFTER pool is defined
+const query = util.promisify(pool.query).bind(pool);
+
+// ✅ Optional: log connection success
 pool.getConnection((err, connection) => {
   if (err) {
-    console.error('Error connecting to MySQL:', err);
+    console.error('❌ Error connecting to MySQL:', err);
     return;
   }
-  console.log('Successfully connected to Aiven MySQL');
-  connection.release(); // Release the connection back to the pool
+  console.log('✅ Successfully connected to Aiven MySQL');
+  connection.release();
 });
 
-module.exports = { pool };
+module.exports = { pool, query };

@@ -6,5 +6,4 @@ const { GetAllUsers, GetUser, DeleteUser, AddUser, UpdateUser ,SendRequestContro
 router.post("/addUser", AddUser);
 
 
-
 module.exports = router;
