@@ -26,7 +26,7 @@ const App = () => {
  <Route element={<AuthLayout />}>
    <Route path="/login" element={<Login />} />
    <Route path="/verify-email" element={<VerifyEmail />} />
-   <Route path="/create-account" element={<CreateAccount />} />
+   <Route path="/register" element={<CreateAccount />} />
    <Route path="/email-code" element={<EmailCode/>} />
    <Route path="/email-success" element={<VerificationSuccess/>} />
    <Route path="/forgot-password" element={<ForgotPassword/>} />

@@ -60,7 +60,7 @@ const NavBarCommon = () => {
                 Login
               </Link>
               <Link 
-                to="/create-account" 
+                to="/register" 
                 className="px-4 py-2 text-sm font-medium text-white bg-[#E17335] rounded-md hover:bg-[#f18245] transition-colors"
               >
                 Sign Up
