@@ -218,18 +218,18 @@ const CreateAccount = () => {
     confirmPassword: '',
     phoneNumber: '',
     location: ''
+    //registeredNumber: ''
   });
 
   const [errors, setErrors] = useState({});
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+  const { name, value } = e.target;
+  setFormData(prev => ({ ...prev, [name]: value }));
+  setErrors(prev => ({ ...prev, [name]: '' }));
+  setError('');
+};
 
-    // Clear error for this field on change
-    setErrors(prev => ({ ...prev, [name]: '' }));
-    setError('');
-  };
 
   const validateForm = () => {
     const newErrors = {};
@@ -256,14 +256,19 @@ const CreateAccount = () => {
       newErrors.confirmPassword = 'Passwords do not match';
     }
 
-    if (!showOrgField) {
-      if (!formData.phoneNumber.trim()) {
-        newErrors.phoneNumber = 'Phone number is required';
-      }
-      if (!formData.location.trim()) {
-        newErrors.location = 'Location is required';
-      }
-    }
+    // if (showOrgField && !formData.registeredNumber.trim()) {
+    //    newErrors.registeredNumber = 'Registered number is required';
+    // }
+
+
+    // if (!showOrgField) {
+    //   if (!formData.phoneNumber.trim()) {
+    //     newErrors.phoneNumber = 'Phone number is required';
+    //   }
+    //   if (!formData.location.trim()) {
+    //     newErrors.location = 'Location is required';
+    //   }
+    // }
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -275,13 +280,14 @@ const CreateAccount = () => {
 
     try {
       const userData = {
-        userName: formData.name,
-        email: formData.email,
-        password: formData.password,
-        phoneNumber: formData.phoneNumber,
-        location: formData.location,
-        userType: showOrgField ? 'organizer' : 'volunteer'
-      };
+      userName: formData.name,   
+      email: formData.email,
+      phoneNumber: formData.phoneNumber,
+      location: formData.location,
+      password: formData.password,
+      userType: showOrgField ? 'organizer' : 'volunteer'
+    };
+    
 
       const response = await axios.post('http://localhost:5000/user/addUser', userData);
 
@@ -348,6 +354,25 @@ const CreateAccount = () => {
             {errors.name && <p className="mt-1 text-sm text-red-500">{errors.name}</p>}
           </div>
 
+          {/* {showOrgField && (
+         <div>
+           <label className="block mb-1 text-gray-700">Registered Number</label>
+           <input
+             type="text"
+             name="registeredNumber"
+             value={formData.registeredNumber}
+             onChange={handleChange}
+             className={`w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[#E17335] ${
+             errors.registeredNumber ? 'border-red-500' : ''
+       }`}
+           />
+        {errors.registeredNumber && (
+         <p className="mt-1 text-sm text-red-500">{errors.registeredNumber}</p>
+        )}
+       </div>
+        )} */}
+
+
           <div>
             <label className="block mb-1 text-gray-700">Email</label>
             <input
@@ -362,8 +387,6 @@ const CreateAccount = () => {
             {errors.email && <p className="mt-1 text-sm text-red-500">{errors.email}</p>}
           </div>
 
-          {!showOrgField && (
-            <>
               <div>
                 <label className="block mb-1 text-gray-700">Phone Number</label>
                 <input
@@ -395,8 +418,6 @@ const CreateAccount = () => {
                   <p className="mt-1 text-sm text-red-500">{errors.location}</p>
                 )}
               </div>
-            </>
-          )}
 
           <div>
             <label className="block mb-1 text-gray-700">Password</label>

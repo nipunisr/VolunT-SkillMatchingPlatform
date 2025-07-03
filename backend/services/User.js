@@ -81,26 +81,64 @@ const DeleteUserById = async (id) => {
 };
 
 
+// const saltRounds = 10;
+
+// const AddNewUser = async (user) => {
+//   const { fName, lName, userName, password, email, userType, location } = user;
+
+//   try {
+//     // 🔐 Hash the password
+//     const hashedPassword = await bcrypt.hash(password, saltRounds);
+
+//     const queryString = 'INSERT INTO users (fName, lName, userName, password, email, userType, location) VALUES (?, ?, ?, ?, ?, ?, ?)';
+//     const values = [fName, lName, userName, hashedPassword, email, userType, location];
+
+//     const results = await query(queryString, values);
+//     return { success: true, message: "User Successfully Created" };
+
+//   } catch (error) {
+//     if (error.code === 'ER_DUP_ENTRY') {
+//       return { success: false, message: 'Email already exists' };
+//     }
+//     throw error;
+//   }
+// };
+
 const saltRounds = 10;
 
 const AddNewUser = async (user) => {
-  const { fName, lName, userName, password, email, userType, location } = user;
+  const {
+    userName,
+    email,
+    phoneNumber = null,
+    location = null,
+    password,
+    userType
+  } = user;
+
+  // Basic validation
+  if (!userName || !password || !email || !userType) {
+    return { success: false, message: 'Missing required fields' };
+  }
 
   try {
-    // 🔐 Hash the password
+    // Hash the password
     const hashedPassword = await bcrypt.hash(password, saltRounds);
 
-    const queryString = 'INSERT INTO users (fName, lName, userName, password, email, userType, location) VALUES (?, ?, ?, ?, ?, ?, ?)';
-    const values = [fName, lName, userName, hashedPassword, email, userType, location];
+    const queryString = `
+      INSERT INTO users (userName, email, phoneNumber, location, password, userType)
+      VALUES (?, ?, ?, ?, ?, ?)
+    `;
+    const values = [userName, email, phoneNumber, location, hashedPassword, userType];
 
-    const results = await query(queryString, values);
+    await query(queryString, values);
     return { success: true, message: "User Successfully Created" };
 
   } catch (error) {
     if (error.code === 'ER_DUP_ENTRY') {
       return { success: false, message: 'Email already exists' };
     }
-    throw error;
+    return { success: false, message: error.message || 'Database error' };
   }
 };
 
@@ -108,7 +146,6 @@ const AddNewUser = async (user) => {
 const SendMessage = async (message, senderUserId) => {
   try {
     
-
     const insertQuery = 'INSERT INTO messages (userId, content, createdAt) VALUES (?, ?, NOW())';
     await query(insertQuery, [senderUserId ,message]);
     console.log("----------------")
