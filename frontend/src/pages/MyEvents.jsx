@@ -1,5 +1,5 @@
 import React from 'react';
-import EventCard from '../components/MyEventsCard';
+import EventCard from '../components/EventCard';
 
 const MyEvents = () => {
   // Sample data - in a real app, you would fetch this from your API

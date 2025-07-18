@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useNavigate } from 'react-router-dom';
+import { loginUser } from '../services/api';
 
 const Login = () => {
   const [formData, setFormData] = useState({
@@ -14,7 +15,7 @@ const Login = () => {
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
-  
+  const [serverError, setServerError] = useState('');
   const navigate = useNavigate();
   
   const validateEmail = (email) => {
@@ -62,31 +63,45 @@ const Login = () => {
     return !newErrors.email && !newErrors.password;
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    
+    // Clear error on each submit
+    setServerError('');
+
     if (validateForm()) {
       setIsSubmitting(true);
-      
-      // Simulate API call
-      setTimeout(() => {
-        console.log('Form submitted:', formData);
-        // Navigate after successful login
-        navigate('/');
+      try {
+        const response = await loginUser(formData);
+        const { user } = response.data;
+
+        // Save user to localStorage (optional)
+        localStorage.setItem('user', JSON.stringify(user));
+
+        // Redirect based on userType
+        if (user.userType === 'organizer') {
+          navigate('/organizer/dashboard');
+        } else {
+          navigate('/'); // or your volunteer dashboard
+        }
+      } catch (err) {
+        setServerError(err.response?.data?.msg || 'Login failed.');
+      } finally {
         setIsSubmitting(false);
-      }, 1000);
+      }
     }
   };
-
   return (
     <div className="w-full">
       <div className="mb-8 text-center">
         <h1 className="text-4xl font-bold text-[#29142C] mb-2">
-          Volunteer Login
+          Volunteer/Organizer Login
         </h1>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-6">
+        {serverError && (
+          <p className="text-red-600 text-center">{serverError}</p>
+        )}
         <div>
           <label 
             htmlFor="email" 
@@ -144,10 +159,9 @@ const Login = () => {
         >
           {isSubmitting ? 'Logging in...' : 'Login'}
         </button>
-
         <div className="text-center">
           <Link 
-            to="/create-account" 
+            to="/register" 
             className="text-sm text-gray-600 hover:text-[#E17335]"
           >
             Don't Have An Account
