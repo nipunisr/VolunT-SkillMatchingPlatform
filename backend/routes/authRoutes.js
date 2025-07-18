@@ -11,7 +11,7 @@
 const express = require('express');
 const router = express.Router();
 const authController = require('../controllers/authController');
-const login = require('../controllers/Auth'); // Import the login function
+const login = require('../controllers/Auth'); 
 const { validateRegister } = require('../middleware/validation');
 
 // Registration Route
