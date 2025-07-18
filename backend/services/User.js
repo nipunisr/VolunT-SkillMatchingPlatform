@@ -106,6 +106,41 @@ const DeleteUserById = async (id) => {
 
 const saltRounds = 10;
 
+// const AddNewUser = async (user) => {
+//   const {
+//     userName,
+//     email,
+//     phoneNumber = null,
+//     location = null,
+//     password,
+//     userType
+//   } = user;
+
+//   // Basic validation
+//   if (!userName || !password || !email || !userType) {
+//     return { success: false, message: 'Missing required fields' };
+//   }
+
+//   try {
+//     // Hash the password
+//     const hashedPassword = await bcrypt.hash(password, saltRounds);
+
+//     const queryString = `
+//       INSERT INTO users (userName, email, phoneNumber, location, password, userType)
+//       VALUES (?, ?, ?, ?, ?, ?)
+//     `;
+//     const values = [userName, email, phoneNumber, location, hashedPassword, userType];
+
+//     await query(queryString, values);
+//     return { success: true, message: "User Successfully Created" };
+
+//   } catch (error) {
+//     if (error.code === 'ER_DUP_ENTRY') {
+//       return { success: false, message: 'Email already exists' };
+//     }
+//     return { success: false, message: error.message || 'Database error' };
+//   }
+// };
 const AddNewUser = async (user) => {
   const {
     userName,
@@ -125,14 +160,35 @@ const AddNewUser = async (user) => {
     // Hash the password
     const hashedPassword = await bcrypt.hash(password, saltRounds);
 
-    const queryString = `
+    // Insert into users table and get inserted userId
+    const insertUserQuery = `
       INSERT INTO users (userName, email, phoneNumber, location, password, userType)
       VALUES (?, ?, ?, ?, ?, ?)
     `;
     const values = [userName, email, phoneNumber, location, hashedPassword, userType];
 
-    await query(queryString, values);
-    return { success: true, message: "User Successfully Created" };
+    const result = await query(insertUserQuery, values);
+    const userId = result.insertId; // <-- Get the inserted userId
+
+    // Insert into volunteer or organizer table with userId only
+    console.log('Inserting into role table for userType:', userType);
+
+try {
+  if (userType === 'volunteer') {
+    await query('INSERT INTO volunteers (userId) VALUES (?)', [userId]);
+  } else if (userType === 'organizer') {
+    await query('INSERT INTO organizers (userId) VALUES (?)', [userId]);
+  }
+} catch (err) {
+  console.error('Error inserting into role table:', err);
+  return { success: false, message: 'Failed to insert role data' };
+}
+    //  else {
+    //   // Optional: handle unexpected userType
+    //   return { success: false, message: 'Invalid user type' };
+    // }
+
+    return { success: true, message: "User Successfully Created", userId };
 
   } catch (error) {
     if (error.code === 'ER_DUP_ENTRY') {
@@ -141,6 +197,82 @@ const AddNewUser = async (user) => {
     return { success: false, message: error.message || 'Database error' };
   }
 };
+
+
+const updateUserAndChild = async (userId, userData, childData) => {
+  const connection = await db.getConnection(); // get connection from your pool
+  try {
+    await connection.beginTransaction();
+
+    // Update users table
+    await connection.query(
+      `UPDATE users SET userName = ?, email = ?, phoneNumber = ?, location = ? WHERE userId = ?`,
+      [userData.userName, userData.email, userData.phoneNumber, userData.location, userId]
+    );
+
+    if (userData.userType === 'organizer') {
+      // Update organizers table
+      const [result] = await connection.query(
+        `UPDATE organizers SET organizationName = ?, registeredNumber = ?, website = ?, contactPerson = ?, address = ? WHERE userId = ?`,
+        [
+          childData.organizationName,
+          childData.registeredNumber || null,
+          childData.website || null,
+          childData.contactPerson || null,
+          childData.address || null,
+          userId
+        ]
+      );
+
+      // If no organizer row exists, insert it
+      if (result.affectedRows === 0) {
+        await connection.query(
+          `INSERT INTO organizers (userId, organizationName, registeredNumber, website, contactPerson, address)
+           VALUES (?, ?, ?, ?, ?, ?)`,
+          [
+            userId,
+            childData.organizationName,
+            childData.registeredNumber || null,
+            childData.website || null,
+            childData.contactPerson || null,
+            childData.address || null
+          ]
+        );
+      }
+    } else if (userData.userType === 'volunteer') {
+      // Update volunteers table
+      const [result] = await connection.query(
+        `UPDATE volunteers SET skills = ?, availability = ? WHERE userId = ?`,
+        [
+          childData.skills || null,
+          childData.availability || null,
+          userId
+        ]
+      );
+
+      // If no volunteer row exists, insert it
+      if (result.affectedRows === 0) {
+        await connection.query(
+          `INSERT INTO volunteers (userId, skills, availability) VALUES (?, ?, ?)`,
+          [
+            userId,
+            childData.skills || null,
+            childData.availability || null
+          ]
+        );
+      }
+    }
+
+    await connection.commit();
+    return { success: true, message: 'User and related data updated successfully' };
+  } catch (error) {
+    await connection.rollback();
+    return { success: false, message: error.message };
+  } finally {
+    connection.release();
+  }
+};
+
 
 
 const SendMessage = async (message, senderUserId) => {
@@ -212,6 +344,7 @@ module.exports = {
   GetListOfUsers,
   DeleteUserById,
   AddNewUser,
+  updateUserAndChild,
   UpdateUserById,
   SendMessage,
   UpdateProfileById,

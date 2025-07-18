@@ -95,3 +95,27 @@ exports.verifyEmail = async (req, res) => {
     });
   }
 };
+
+exports.login = async (req, res) => {
+  const { email, password } = req.body;
+  try {
+    const [rows] = await pool.query('SELECT * FROM users WHERE email = ?', [email]);
+    if (!rows.length) return res.status(400).json({ success: false, msg: 'Invalid credentials' });
+
+    const user = rows[0];
+    const matched = await bcrypt.compare(password, user.password);
+    if (!matched) return res.status(400).json({ success: false, msg: 'Invalid credentials' });
+
+    res.json({
+      success: true,
+      user: {
+        userId: user.userId,
+        userName: user.userName,
+        email: user.email,
+        userType: user.userType  // This is KEY for frontend
+      }
+    });
+  } catch (err) {
+    res.status(500).json({ success: false, msg: 'Server error' });
+  }
+};

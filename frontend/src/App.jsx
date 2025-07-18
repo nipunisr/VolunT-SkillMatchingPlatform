@@ -1,8 +1,13 @@
 // src/App.jsx
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 
+import { UserProvider } from './context/UserContext'; // Import your AuthProvider
+
+
 import AuthLayout from './layouts/AuthLayout';
 import DashboardLayout from './layouts/DashboardLayout';
+import OrganizerLayout from './layouts/OrganizerLayout';
+
 import Login from './pages/Login';
 import VerifyEmail from './pages/VerifyEmail';
 import CreateAccount from './pages/CreateAccount';
@@ -18,10 +23,14 @@ import MyEvents from './pages/MyEvents';
 import VolunteerProfile from './pages/VolunteerProfile';
 import Notifications from './pages/Notifications';
 import UpdatedCreation from './pages/UpdatedAccountCreation';
+import OrgDashboard from './pages/OrganizerDashboard';
+
+
 
 const App = () => {
  return (
  <BrowserRouter>
+ <UserProvider>
  <Routes>
  <Route element={<AuthLayout />}>
    <Route path="/login" element={<Login />} />
@@ -46,6 +55,12 @@ const App = () => {
   <Route path='/volunteer-profile' element={<VolunteerProfile/>}/>
   <Route path='/notifications' element={<Notifications/>}/>
 </Route>
+
+<Route element={<OrganizerLayout />}>
+  
+  <Route path='/organizer/dashboard' element={<OrgDashboard/>}/>
+
+</Route>
   
        {/* <Route element={<VolunteerLayout />}>
           
@@ -56,6 +71,7 @@ const App = () => {
        
 
  </Routes>
+ </UserProvider>
  </BrowserRouter>
  );
 };

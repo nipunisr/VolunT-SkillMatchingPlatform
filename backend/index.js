@@ -3,6 +3,7 @@ const express = require('express');
 const cors = require('cors');
 const { pool } = require('./config/db');
 const userRoutes = require('./routes/User');
+const authRoutes = require('./routes/authRoutes');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -13,6 +14,7 @@ app.use(express.json());
 
 // Routes
 app.use('/user',userRoutes);
+app.use('/api/auth', authRoutes);
 
 // Test DB connection
 pool.getConnection((err, connection) => {

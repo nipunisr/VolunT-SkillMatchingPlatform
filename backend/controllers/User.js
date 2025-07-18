@@ -5,6 +5,7 @@ const {
   GetUserById,
   DeleteUserById,
   AddNewUser,
+  updateUserAndChild,
   SendMessage,
   UpdateProfileById,
   updateCred
@@ -43,6 +44,29 @@ const AddUser = async (req, res) => {
   // DO SOMETHING WITH THE USER OR JUST RETURN IT
   return res.json(newUser);
 };
+//const { updateUserAndChild } = require('../services/users');
+
+const updateUserProfile = async (req, res) => {
+  const userId = req.params.userId;
+  const { userData, childData } = req.body;
+
+  if (!userData || !userId) {
+    return res.status(400).json({ success: false, message: 'Invalid input' });
+  }
+
+  try {
+    const result = await updateUserAndChild(userId, userData, childData);
+    if (result.success) {
+      res.json({ success: true, message: result.message });
+    } else {
+      res.status(500).json({ success: false, message: result.message });
+    }
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+};
+
+
 
 const UpdateUser = async (req, res) => {
   const userId = req.params.id;
@@ -135,6 +159,7 @@ module.exports = {
   GetUser,
   DeleteUser,
   AddUser,
+  updateUserProfile,
   UpdateUser,
   SendRequestController,
   UpdateProfile,
