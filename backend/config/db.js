@@ -18,6 +18,8 @@ const pool = mysql.createPool({
 
 // ✅ Then promisify query AFTER pool is defined
 const query = util.promisify(pool.query).bind(pool);
+const promisePool = pool.promise();
+
 
 // ✅ Optional: log connection success
 pool.getConnection((err, connection) => {
@@ -29,4 +31,4 @@ pool.getConnection((err, connection) => {
   connection.release();
 });
 
-module.exports = { pool, query };
+module.exports = { pool, query, promisePool };

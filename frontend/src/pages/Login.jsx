@@ -64,32 +64,33 @@ const Login = () => {
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    // Clear error on each submit
-    setServerError('');
+  e.preventDefault();
+  setServerError('');
 
-    if (validateForm()) {
-      setIsSubmitting(true);
-      try {
-        const response = await loginUser(formData);
-        const { user } = response.data;
+  if (validateForm()) {
+    setIsSubmitting(true);
+    try {
+      const response = await loginUser(formData);
+      const { user, token } = response.data;
 
-        // Save user to localStorage (optional)
-        localStorage.setItem('user', JSON.stringify(user));
+      // Save token and user separately for ease of use
+      localStorage.setItem('token', token);
+      localStorage.setItem('user', JSON.stringify(user));
 
-        // Redirect based on userType
-        if (user.userType === 'organizer') {
-          navigate('/organizer/dashboard');
-        } else {
-          navigate('/'); // or your volunteer dashboard
-        }
-      } catch (err) {
-        setServerError(err.response?.data?.msg || 'Login failed.');
-      } finally {
-        setIsSubmitting(false);
+      // Redirect based on userType
+      if (user.userType === 'organizer') {
+        navigate('/organizer/dashboard');
+      } else {
+        navigate('/'); // or volunteer dashboard route
       }
+    } catch (err) {
+      setServerError(err.response?.data?.msg || 'Login failed.');
+    } finally {
+      setIsSubmitting(false);
     }
-  };
+  }
+};
+
   return (
     <div className="w-full">
       <div className="mb-8 text-center">

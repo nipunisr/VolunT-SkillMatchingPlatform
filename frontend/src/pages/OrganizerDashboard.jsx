@@ -7,8 +7,9 @@ import { useUserContext } from '../context/UserContext';
 
 const OrganizerDashboard = () => {
   const { currentUser } = useUserContext();
-  const organizerId = currentUser?.id;
-
+  const organizerId = currentUser?.userId;
+console.log('Current User:', currentUser);
+console.log('Organizer ID:', organizerId);
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -22,12 +23,7 @@ const OrganizerDashboard = () => {
     
     try {
       const response = await axios.get(
-        `http://localhost:5000/api/events/organizer/${organizerId}`,
-        {
-          headers: {
-            'Authorization': `Bearer ${localStorage.getItem('token')}`
-          }
-        }
+        `http://localhost:5000/api/events/organizer/${organizerId}`
       );
       
       if (response.data.success) {
@@ -44,8 +40,18 @@ const OrganizerDashboard = () => {
   }, [organizerId]);
 
   useEffect(() => {
+  if (organizerId) {
     fetchEvents();
-  }, [fetchEvents]);
+  }
+}, [organizerId, fetchEvents]);
+
+if (!currentUser || !organizerId) {
+  return (
+    <div className="text-center py-8">
+      <p>Loading user information...</p>
+    </div>
+  );
+}
 
   return (
     <div className="bg-white min-h-screen">

@@ -25,6 +25,14 @@ class User {
       [userId]
     );
   }
+  static async findById(userId) {
+  const [rows] = await promisePool.query(
+    'SELECT userId, userName, email, phoneNumber, location, userType, isVerified FROM users WHERE userId = ?',
+    [userId]
+  );
+  return rows[0];
 }
+}
+
 
 module.exports = User;

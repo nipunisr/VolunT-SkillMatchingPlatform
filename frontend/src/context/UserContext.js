@@ -1,59 +1,81 @@
-// // src/context/UserContext.js
-// import React, { createContext, useContext, useState } from 'react';
+
+// import React, { createContext, useContext, useEffect, useState } from 'react';
 
 // const UserContext = createContext();
 
 // export const UserProvider = ({ children }) => {
 //   const [currentUser, setCurrentUser] = useState(null);
 
-//   // You can add logic here to fetch/set current user
+//   // Load user from localStorage when app starts
+//   useEffect(() => {
+//     const storedUser = localStorage.getItem('user');
+//     if (storedUser) {
+//       setCurrentUser(JSON.parse(storedUser));
+//     }
+//   }, []);
+
+//   const login = (userData) => {
+//     localStorage.setItem('user', JSON.stringify(userData));
+//     setCurrentUser(userData);
+//   };
+
+//   const logout = () => {
+//     localStorage.removeItem('user');
+//     setCurrentUser(null);
+//   };
 
 //   return (
-//     <UserContext.Provider value={{ currentUser, setCurrentUser }}>
+//     <UserContext.Provider value={{ currentUser, login, logout }}>
 //       {children}
 //     </UserContext.Provider>
 //   );
 // };
 
-// // Custom hook to consume the UserContext
-// export const useUserContext = () => {
-//   return useContext(UserContext);
-// };
-
-// export default UserProvider;
+// export const useUserContext = () => useContext(UserContext);
 
 
-// src/context/UserContext.js
-import React, { createContext, useContext, useEffect, useState } from 'react';
 
+import React, { createContext, useContext, useState, useEffect } from 'react';
+import axios from 'axios';
+
+// Create the context
 const UserContext = createContext();
 
+// Provider component
 export const UserProvider = ({ children }) => {
   const [currentUser, setCurrentUser] = useState(null);
+  const [loadingUser, setLoadingUser] = useState(true);
 
-  // Load user from localStorage when app starts
   useEffect(() => {
-    const storedUser = localStorage.getItem('user');
-    if (storedUser) {
-      setCurrentUser(JSON.parse(storedUser));
-    }
+    const loadUserProfile = async () => {
+      try {
+        const token = localStorage.getItem('token');
+        if (!token) {
+          setLoadingUser(false);
+          return; // no token, no user
+        }
+
+        const { data } = await axios.get('/api/profile', {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        setCurrentUser(data);
+      } catch (err) {
+        console.error('Failed to load profile', err);
+        setCurrentUser(null);
+      } finally {
+        setLoadingUser(false);
+      }
+    };
+
+    loadUserProfile();
   }, []);
 
-  const login = (userData) => {
-    localStorage.setItem('user', JSON.stringify(userData));
-    setCurrentUser(userData);
-  };
-
-  const logout = () => {
-    localStorage.removeItem('user');
-    setCurrentUser(null);
-  };
-
   return (
-    <UserContext.Provider value={{ currentUser, login, logout }}>
+    <UserContext.Provider value={{ currentUser, setCurrentUser, loadingUser }}>
       {children}
     </UserContext.Provider>
   );
 };
 
+// Custom hook for easier usage
 export const useUserContext = () => useContext(UserContext);

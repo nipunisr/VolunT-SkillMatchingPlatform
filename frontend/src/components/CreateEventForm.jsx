@@ -6,6 +6,7 @@ import * as yup from 'yup';
 import { format } from 'date-fns';
 import { createEvent } from '../services/api';
 
+
 const eventSchema = yup.object().shape({
   title: yup.string().required('Title is required'),
   description: yup.string().required('Description is required'),
@@ -26,6 +27,7 @@ const eventSchema = yup.object().shape({
 });
 
 const CreateEventForm = ({ organizerId, onSuccess, onClose }) => {
+  console.log('Organizer ID:', organizerId);
   const { 
     register, 
     handleSubmit, 
@@ -36,7 +38,9 @@ const CreateEventForm = ({ organizerId, onSuccess, onClose }) => {
       isRemote: false,
       status: 'active'
     }
-  });
+    
+  }
+);
 
   const [loading, setLoading] = useState(false);
   const [serverError, setServerError] = useState('');
@@ -55,6 +59,7 @@ const CreateEventForm = ({ organizerId, onSuccess, onClose }) => {
         isRemote: data.isRemote ? 1 : 0,
         requiredSkill: data.requiredSkill || null,
       };
+      console.log('Sending event data:', formattedData);
 
       const response = await createEvent(formattedData);
 

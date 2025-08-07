@@ -4,6 +4,10 @@ const cors = require('cors');
 const { pool } = require('./config/db');
 const userRoutes = require('./routes/User');
 const authRoutes = require('./routes/authRoutes');
+const eventsRoutes = require('./routes/events');
+const protectedRoutes = require('./routes/protectedRoutes');
+
+
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -15,6 +19,10 @@ app.use(express.json());
 // Routes
 app.use('/user',userRoutes);
 app.use('/api/auth', authRoutes);
+app.use('/api/events', eventsRoutes);
+app.use('/api', protectedRoutes);
+
+
 
 // Test DB connection
 pool.getConnection((err, connection) => {

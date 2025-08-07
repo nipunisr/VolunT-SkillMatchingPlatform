@@ -1,6 +1,58 @@
+// import axios from 'axios';
+
+// // Existing fetchOpportunities function
+// export const fetchOpportunities = async (filters = {}) => {
+//   const query = new URLSearchParams(filters).toString();
+//   const response = await fetch(`/api/opportunities?${query}`);
+//   if (!response.ok) throw new Error('Failed to fetch opportunities');
+//   return response.json();
+// };
+
+// export const loginUser = (formData) => {
+//   return axios.post('http://localhost:5000/api/auth/login', formData);
+// };
+
+
+// export const getProfile = async () => {
+//   const token = localStorage.getItem('token');
+//   const config = {
+//     headers: {
+//       Authorization: `Bearer ${token}`
+//     }
+//   };
+//   return await axios.get('/api/profile', config);
+// };
+
+// export const createEvent = async (eventData) => {
+//   const token = localStorage.getItem('token');
+//   const config = {
+//     headers: {
+//       Authorization: `Bearer ${token}`
+//     }
+//   };
+//   return axios.post('/api/events/create', eventData, config);
+// };
+
+
 import axios from 'axios';
 
-// Existing fetchOpportunities function
+// Optional: Set base URL globally if you call same server URLs
+// axios.defaults.baseURL = 'http://localhost:5000';
+
+// Add a request interceptor to automatically add token in headers
+axios.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem('token'); // get token from localStorage
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`; // attach token
+    }
+    return config;
+  },
+  (error) => Promise.reject(error)
+);
+
+// Your existing APIs:
+
 export const fetchOpportunities = async (filters = {}) => {
   const query = new URLSearchParams(filters).toString();
   const response = await fetch(`/api/opportunities?${query}`);
@@ -8,22 +60,15 @@ export const fetchOpportunities = async (filters = {}) => {
   return response.json();
 };
 
-// New: Create event function using axios
-export const createEvent = async (eventData) => {
-  try {
-    const response = await axios.post('http://localhost:5000/api/events', eventData, {
-      headers: {
-        'Content-Type': 'application/json',
-        // Include auth token if needed
-        // Authorization: `Bearer ${localStorage.getItem('token')}`,
-      }
-    });
-    return response.data;
-  } catch (error) {
-    throw error.response?.data || error;
-  }
-};
-
 export const loginUser = (formData) => {
   return axios.post('http://localhost:5000/api/auth/login', formData);
+};
+
+export const getProfile = () => {
+  // Now no need to pass headers manually, interceptor handles it
+  return axios.get('/api/profile');
+};
+
+export const createEvent = (eventData) => {
+  return axios.post('/api/events/create', eventData);
 };
