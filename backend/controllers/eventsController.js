@@ -90,9 +90,82 @@
 
 const { query } = require('../config/db');
 
+// exports.createEvent = async (req, res) => {
+//   try {
+//     // Use userId from authenticated token set by authMiddleware, NOT from client body
+//     const userId = req.user?.userId;
+//     if (!userId) {
+//       return res.status(401).json({ success: false, message: 'Unauthorized: userId missing' });
+//     }
+
+//     const {
+//       title,
+//       description,
+//       requiredSkill,
+//       startDate,
+//       endDate,
+//       location,
+//       isRemote,
+//       maxVolunteers,
+//       status,
+//     } = req.body;
+
+//     console.log('Create Event received data:', req.body);
+
+//     // Basic validation of required fields
+//     if (!title || !description || !startDate || !endDate || !location || !maxVolunteers) {
+//       return res.status(400).json({ success: false, message: 'Missing required fields.' });
+//     }
+
+//     // Convert isRemote to 0 or 1 if boolean
+//     const isRemoteValue = isRemote ? 1 : 0;
+
+//     const sql = `
+//       INSERT INTO events 
+//       (title, description, requiredSkill, startDate, endDate, location, isRemote, maxVolunteers, status, userId, createdAt)
+//       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())
+//     `;
+
+//     const values = [
+//       title.trim(),
+//       description.trim(),
+//       requiredSkill ? requiredSkill.trim() : null,
+//       startDate,
+//       endDate,
+//       location.trim(),
+//       isRemoteValue,
+//       maxVolunteers,
+//       status || 'active',
+//       userId,
+//     ];
+
+//     const result = await query(sql, values);
+
+//     return res.status(201).json({ 
+//       success: true, 
+//       event: { 
+//         eventId: result.insertId, 
+//         title, 
+//         description, 
+//         requiredSkill, 
+//         startDate, 
+//         endDate, 
+//         location, 
+//         isRemote: isRemoteValue, 
+//         maxVolunteers, 
+//         status: status || 'active', 
+//         userId 
+//       } 
+//     });
+//   } catch (error) {
+//     console.error('Error creating event:', error);
+//     return res.status(500).json({ success: false, message: 'Server error.' });
+//   }
+// };
+
+
 exports.createEvent = async (req, res) => {
   try {
-    // Use userId from authenticated token set by authMiddleware, NOT from client body
     const userId = req.user?.userId;
     if (!userId) {
       return res.status(401).json({ success: false, message: 'Unauthorized: userId missing' });
@@ -101,7 +174,7 @@ exports.createEvent = async (req, res) => {
     const {
       title,
       description,
-      requiredSkill,
+      requiredSkills, // Array of skillIds [1, 2, 3]
       startDate,
       endDate,
       location,
@@ -110,58 +183,49 @@ exports.createEvent = async (req, res) => {
       status,
     } = req.body;
 
-    console.log('Create Event received data:', req.body);
-
-    // Basic validation of required fields
     if (!title || !description || !startDate || !endDate || !location || !maxVolunteers) {
       return res.status(400).json({ success: false, message: 'Missing required fields.' });
     }
 
-    // Convert isRemote to 0 or 1 if boolean
+    if (!Array.isArray(requiredSkills) || requiredSkills.length === 0) {
+      return res.status(400).json({ success: false, message: 'At least one skill must be selected' });
+    }
+
     const isRemoteValue = isRemote ? 1 : 0;
 
-    const sql = `
+    // Insert event
+    const insertEventSql = `
       INSERT INTO events 
-      (title, description, requiredSkill, startDate, endDate, location, isRemote, maxVolunteers, status, userId, createdAt)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())
+      (title, description, startDate, endDate, location, isRemote, maxVolunteers, status, userId, createdAt)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())
     `;
-
-    const values = [
+    const result = await query(insertEventSql, [
       title.trim(),
       description.trim(),
-      requiredSkill ? requiredSkill.trim() : null,
       startDate,
       endDate,
       location.trim(),
       isRemoteValue,
       maxVolunteers,
       status || 'active',
-      userId,
-    ];
+      userId
+    ]);
 
-    const result = await query(sql, values);
+    const eventId = result.insertId;
 
-    return res.status(201).json({ 
-      success: true, 
-      event: { 
-        eventId: result.insertId, 
-        title, 
-        description, 
-        requiredSkill, 
-        startDate, 
-        endDate, 
-        location, 
-        isRemote: isRemoteValue, 
-        maxVolunteers, 
-        status: status || 'active', 
-        userId 
-      } 
-    });
+    // Insert required skills for event
+    const skillValues = requiredSkills.map(skillId => [eventId, skillId]);
+    const insertSkillsSql = 'INSERT INTO event_skills (opportunityId, skillId) VALUES ?';
+    await query(insertSkillsSql, [skillValues]);
+
+    res.status(201).json({ success: true, eventId });
   } catch (error) {
     console.error('Error creating event:', error);
-    return res.status(500).json({ success: false, message: 'Server error.' });
+    res.status(500).json({ success: false, message: 'Server error' });
   }
 };
+
+
 exports.getEventsByOrganizer = async (req, res) => {
   const organizerId = req.params.organizerId; // fixed typo
 

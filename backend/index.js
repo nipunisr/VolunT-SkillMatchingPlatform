@@ -6,7 +6,7 @@ const userRoutes = require('./routes/User');
 const authRoutes = require('./routes/authRoutes');
 const eventsRoutes = require('./routes/events');
 const protectedRoutes = require('./routes/protectedRoutes');
-
+const skillsRoutes = require('./routes/skills');
 
 
 const app = express();
@@ -21,6 +21,8 @@ app.use('/user',userRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/events', eventsRoutes);
 app.use('/api', protectedRoutes);
+app.use('/api/skills', skillsRoutes);
+
 
 
 
