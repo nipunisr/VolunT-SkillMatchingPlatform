@@ -44,18 +44,9 @@ const eventController = require('../controllers/eventsController');
 const authMiddleware = require('../middleware/authMiddleware');
 const permit = require('../middleware/roleMiddleware');
 
-// Create a new event (already present)
 router.post('/', authMiddleware, permit('organizer'), eventController.createEvent);
 
-// Get all events for a specific organizer
-router.get('/organizer/:organizerId', authMiddleware, permit('organizer'), eventController.getEventsByOrganizer);
-
-// Optional: Add more CRUD routes like update, delete if needed
-// Example: Update event
-// router.put('/:eventId', authMiddleware, permit('organizer'), eventController.updateEvent);
-
-// Example: Delete event
-// router.delete('/:eventId', authMiddleware, permit('organizer'), eventController.deleteEvent);
+router.post('/organizer/:organizerId', authMiddleware, permit('organizer'), eventController.getEventsByOrganizer);
 
 module.exports = router;
 

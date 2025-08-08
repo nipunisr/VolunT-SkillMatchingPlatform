@@ -19,6 +19,12 @@ router.post('/register', validateRegister, authController.register);
 
 // Login Route (this is missing in your code!)
 router.post('/login', authController.login);
+// In your authRoutes.js or similar
+router.post('/logout', (req, res) => {
+  res.clearCookie('token');  // if using cookie storing token
+  res.status(200).json({ message: 'Logged out' });
+});
+
 
 // Email Verification Route
 //router.post('/verify-email', authController.verifyEmail);

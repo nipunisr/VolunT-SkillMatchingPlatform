@@ -620,61 +620,84 @@ const CreateAccount = () => {
       alert('Update error: ' + error.message);
     }
   };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!validateForm()) return;
 
-    if (currentUser) {
-      // Update existing user profile
-      await updateProfile();
-    } else {
-      // Register new user
-      try {
-        const userData = {
-          userName: formData.name,
-          email: formData.email,
-          phoneNumber: formData.phoneNumber,
-          location: formData.location,
-          password: formData.password,
-          userType: showOrgField ? 'organizer' : 'volunteer'
-        };
+    try {
+      const userData = {
+        userName: formData.name,
+        email: formData.email,
+        phoneNumber: formData.phoneNumber,
+        location: formData.location,
+        password: formData.password,
+        userType: showOrgField ? 'organizer' : 'volunteer'
+      };
 
-        const response = await axios.post('http://localhost:5000/user/addUser', userData);
-
-      //   if (response.data.success) {
-      //     navigate('/verify-email', { state: { email: formData.email } });
-      //   } else {
-      //     if (response.data.message.toLowerCase().includes('email')) {
-      //       setErrors(prev => ({ ...prev, email: response.data.message }));
-      //     } else {
-      //       setError(response.data.message || 'Registration failed');
-      //     }
-      //   }
-      // } catch (err) {
-      //   const backendMessage = err.response?.data?.message || 'Registration failed. Please try again.';
-      //   if (backendMessage.toLowerCase().includes('email')) {
-      //     setErrors(prev => ({ ...prev, email: backendMessage }));
-      //   } else {
-      //     setError(backendMessage);
-      //   }
-      //   console.error('Registration error:', err);
-      // }
+      const response = await axios.post('http://localhost:5000/user/addUser', userData);
 
       if (response.data.success) {
-      if (userData.userType === 'organizer') {
-        navigate('/organizer/dashboard');
+        if (userData.userType === 'organizer') {
+          navigate('/organizer/dashboard');
+        } else {
+          navigate('/verify-email', { state: { email: formData.email } });
+        }
       } else {
-        navigate('/verify-email', { state: { email: formData.email } });
+        if (response.data.message.toLowerCase().includes('email')) {
+          setErrors(prev => ({ ...prev, email: response.data.message }));
+        } else {
+          setError(response.data.message || 'Registration failed');
+        }
       }
-    } else {
-      // handle errors...
-    }
-  } catch (err) {
-    // handle errors...
-  }
+    } catch (err) {
+      const backendMessage = err.response?.data?.message || 'Registration failed. Please try again.';
+      if (backendMessage.toLowerCase().includes('email')) {
+        setErrors(prev => ({ ...prev, email: backendMessage }));
+      } else {
+        setError(backendMessage);
+      }
+      console.error('Registration error:', err);
     }
   };
+
+
+  // const handleSubmit = async (e) => {
+  //   e.preventDefault();
+  //   if (!validateForm()) return;
+
+  //   if (currentUser) {
+  //     // Update existing user profile
+  //     await updateProfile();
+  //   } else {
+  //     // Register new user
+  //     try {
+  //       const userData = {
+  //         userName: formData.name,
+  //         email: formData.email,
+  //         phoneNumber: formData.phoneNumber,
+  //         location: formData.location,
+  //         password: formData.password,
+  //         userType: showOrgField ? 'organizer' : 'volunteer'
+  //       };
+
+  //       const response = await axios.post('http://localhost:5000/user/addUser', userData);
+
+      
+
+  //     if (response.data.success) {
+  //     if (userData.userType === 'organizer') {
+  //       navigate('/organizer/dashboard');
+  //     } else {
+  //       navigate('/verify-email', { state: { email: formData.email } });
+  //     }
+  //   } else {
+  //     // handle errors...
+  //   }
+  // } catch (err) {
+  //   // handle errors...
+  // }
+  //   }
+  // };
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-50">

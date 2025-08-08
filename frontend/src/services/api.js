@@ -55,7 +55,7 @@ axios.interceptors.request.use(
 
 export const fetchOpportunities = async (filters = {}) => {
   const query = new URLSearchParams(filters).toString();
-  const response = await fetch(`/api/opportunities?${query}`);
+  const response = await fetch(`http://localhost:5000/api/opportunities?${query}`);
   if (!response.ok) throw new Error('Failed to fetch opportunities');
   return response.json();
 };
@@ -66,9 +66,12 @@ export const loginUser = (formData) => {
 
 export const getProfile = () => {
   // Now no need to pass headers manually, interceptor handles it
-  return axios.get('/api/profile');
+  return axios.get('http://localhost:5000/api/profile');
 };
 
-export const createEvent = (eventData) => {
-  return axios.post('/api/events/create', eventData);
+export const createEvent = async (eventData) => {
+  const response = await axios.post('http://localhost:5000/api/events', eventData, {
+    headers: { 'Content-Type': 'application/json' },
+  });
+  return response.data;
 };
