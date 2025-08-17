@@ -31,4 +31,18 @@ pool.getConnection((err, connection) => {
   connection.release();
 });
 
-module.exports = { pool, query, promisePool };
+const MAX_RETRIES = 3;
+
+async function queryWithRetry(sql, params, retries = MAX_RETRIES) {
+  try {
+    return await query(sql, params);
+  } catch (error) {
+    if (retries > 0 && (error.code === 'ECONNRESET' || error.fatal || error.code === 'PROTOCOL_CONNECTION_LOST')) {
+      console.warn(`Query failed due to connection reset. Retrying... (${MAX_RETRIES - retries + 1})`);
+      return queryWithRetry(sql, params, retries - 1);
+    }
+    throw error;
+  }
+}
+
+module.exports = { pool, query: queryWithRetry, promisePool };

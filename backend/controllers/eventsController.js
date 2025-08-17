@@ -224,6 +224,26 @@ exports.createEvent = async (req, res) => {
     res.status(500).json({ success: false, message: 'Server error' });
   }
 };
+exports.getEventById = async (req, res) => {
+  const eventId = req.params.opportunityId;
+  try {
+    const events = await query(
+      'SELECT * FROM events WHERE opportunityId = ?',
+      [eventId]
+    );
+
+    if (!events || events.length === 0) {
+      return res.status(404).json({ success: false, message: "Event not found" });
+    }
+
+    const event = events[0]; // Extract first event
+    res.json({ success: true, event });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: "Server error" });
+  }
+};
+
 
 
 exports.getEventsByOrganizer = async (req, res) => {
@@ -239,6 +259,97 @@ exports.getEventsByOrganizer = async (req, res) => {
     res.json({ success: true, events: rows });
   } catch (error) {
     console.error('Error fetching events:', error);
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
+};
+
+// exports.getEventById = async (req, res) => {
+//   try {
+//     const eventId = req.params.id;
+
+//     const eventSql = 'SELECT * FROM events WHERE opportunityId = ? LIMIT 1';
+//     const [events] = await query(eventSql, [eventId]);
+
+//     if (!events || events.length === 0) {
+//       return res.status(404).json({ success: false, message: 'Event not found' });
+//     }
+
+//     const event = events[0];
+
+//     res.json({ success: true, event });
+//   } catch (error) {
+//     console.error('Error fetching event:', error);
+//     res.status(500).json({ success: false, message: 'Server error' });
+//   }
+// };
+
+exports.updateEventById = async (req, res) => {
+  try {
+    const eventId = req.params.opportunityId;
+    const userId = req.user?.userId;
+    console.log('Auth user:', req.user);
+
+    if (!userId) {
+      return res.status(401).json({ success: false, message: 'Unauthorized' });
+    }
+
+    // Check ownership or allow admin
+    const ownerCheckSql = 'SELECT userId FROM events WHERE opportunityId = ? LIMIT 1';
+    const [rows] = await query(ownerCheckSql, [eventId]);
+    if (!rows.length || (rows[0].userId !== userId && req.user.userType !== 'admin')) {
+      return res.status(403).json({ success: false, message: 'Forbidden: Not event owner or admin' });
+    }
+
+    // Allowed fields for update
+    const allowedFields = ['startDate', 'endDate', 'location', 'isRemote', 'maxVolunteers', 'status'];
+
+    const updates = {};
+    allowedFields.forEach(field => {
+      if (req.body[field] !== undefined) updates[field] = req.body[field];
+    });
+
+    if (Object.keys(updates).length === 0) {
+      return res.status(400).json({ success: false, message: 'No valid fields to update' });
+    }
+
+    const setClause = Object.keys(updates)
+      .map(field => `${field} = ?`)
+      .join(', ');
+    const params = [...Object.values(updates), eventId];
+
+    const updateSql = `UPDATE events SET ${setClause} WHERE opportunityId = ?`;
+    await query(updateSql, params);
+
+    const getUpdatedEventSql = 'SELECT * FROM events WHERE opportunityId = ? LIMIT 1';
+    const [updatedRows] = await query(getUpdatedEventSql, [eventId]);
+
+    if (!updatedRows.length) {
+      return res.status(404).json({ success: false, message: 'Event not found after update' });
+    }
+
+    res.json({ success: true, event: updatedRows[0] });
+  } catch (error) {
+    console.error('Error updating event:', error);
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
+};
+
+
+// In your eventsController.js
+exports.getEventSkills = async (req, res) => {
+  const opportunityId = req.params.opportunityId;
+  try {
+    const sql = `
+      SELECT s.skillId, s.name AS skillName, c.name AS categoryName
+      FROM event_skills es
+      JOIN skills s ON es.skillId = s.skillId
+      JOIN categories c ON s.categoryId = c.categoryId
+      WHERE es.opportunityId = ?
+    `;
+    const rows = await query(sql, [opportunityId]);
+    res.json({ success: true, skills: rows });
+  } catch (error) {
+    console.error('Error fetching event skills:', error);
     res.status(500).json({ success: false, message: 'Server error' });
   }
 };

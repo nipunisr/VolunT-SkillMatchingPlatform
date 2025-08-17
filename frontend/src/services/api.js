@@ -35,6 +35,7 @@
 
 
 import axios from 'axios';
+axios.defaults.withCredentials = true;
 
 // Optional: Set base URL globally if you call same server URLs
 // axios.defaults.baseURL = 'http://localhost:5000';
@@ -74,4 +75,28 @@ export const createEvent = async (eventData) => {
     headers: { 'Content-Type': 'application/json' },
   });
   return response.data;
+};
+export const getEventById = async (opportunityId) => {
+  const response = await axios.get(`http://localhost:5000/api/events/${opportunityId}`);
+  return response.data.event;
+};
+
+// export const updateEventById = async (opportunityId, updateData) => {
+//   const response = await axios.put(`http://localhost:5000/api/events/${opportunityId}`, updateData);
+//   return response.data.event;
+// };
+
+export const getEventSkills = async (opportunityId) => {
+  const res = await fetch(`http://localhost:5000/api/events/${opportunityId}/skills`);
+  const data = await res.json();
+  return data.skills || [];
+};
+
+// export const updateEventById = async (opportunityId, data) => {
+//   const res = await axios.put(`http://localhost:5000/api/events/${opportunityId}`, data);
+//   return res.data.event;
+// };
+export const updateEventById = async (opportunityId, data) => {
+  const res = await axios.put(`http://localhost:5000/api/events/${opportunityId}`, data);
+  return res.data.event;
 };

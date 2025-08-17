@@ -289,6 +289,7 @@ import axios from 'axios';
 // Create Auth Context
 const AuthContext = createContext();
 
+
 // Custom hook to use AuthContext
 export const useAuth = () => {
   const context = useContext(AuthContext);

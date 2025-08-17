@@ -40,13 +40,21 @@
 
 const express = require('express');
 const router = express.Router();
-const eventController = require('../controllers/eventsController');
+const eventsController = require('../controllers/eventsController');
 const authMiddleware = require('../middleware/authMiddleware');
 const permit = require('../middleware/roleMiddleware');
+console.log('permit:', permit);
+console.log('authMiddleware:', authMiddleware);
+console.log('createEvent:', eventsController.createEvent);
 
-router.post('/', authMiddleware, permit('organizer'), eventController.createEvent);
+router.get('/:opportunityId', eventsController.getEventById);
+//router.put('/:opportunityId', authMiddleware, permit('organizer'), eventsController.updateEventById); 
+router.get('/:opportunityId/skills', eventsController.getEventSkills);
+router.put('/:opportunityId', authMiddleware, eventsController.updateEventById);
 
-router.post('/organizer/:organizerId', authMiddleware, permit('organizer'), eventController.getEventsByOrganizer);
+router.post('/', authMiddleware, permit('organizer'), eventsController.createEvent);
+
+router.post('/organizer/:organizerId', authMiddleware, permit('organizer'), eventsController.getEventsByOrganizer);
 
 module.exports = router;
 

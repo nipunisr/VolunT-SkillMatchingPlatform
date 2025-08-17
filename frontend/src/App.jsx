@@ -2,7 +2,7 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 
 import { UserProvider } from './context/UserContext'; // Import your AuthProvider
-
+import { useAuth } from './context/AuthContext';
 
 import AuthLayout from './layouts/AuthLayout';
 import DashboardLayout from './layouts/DashboardLayout';
@@ -26,6 +26,7 @@ import UpdatedCreation from './pages/UpdatedAccountCreation';
 import OrgDashboard from './pages/OrganizerDashboard';
 import Profile from './components/Profile';
 import ProtectedRoute from './components/ProtectedRoute'; 
+import EventDetails from './pages/EventDetails';
 
 
 // const App = () => {
@@ -71,11 +72,15 @@ import ProtectedRoute from './components/ProtectedRoute';
 // };
 
 
-
-
-
-
 const App = () => {
+  const { user, loading } = useAuth();
+
+  // While auth state is loading, show loading or empty div
+  if (loading) return <div>Loading...</div>;
+
+  // Get currentUserId safely (might be undefined if not logged in)
+  const currentUserId = user?.userId;
+
   return (
     <BrowserRouter>
       <UserProvider>
@@ -128,6 +133,7 @@ const App = () => {
           >
             <Route path="/organizer/dashboard" element={<OrgDashboard />} />
             <Route path="/profile" element={<Profile />} />
+            <Route path="/events/:opportunityId" element={<EventDetails currentUserId={currentUserId} />} />
           </Route>
 
           {/* Fallback DashboardLayout, if you have general users or other roles */}

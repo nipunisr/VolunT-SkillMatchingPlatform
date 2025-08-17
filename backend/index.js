@@ -11,9 +11,14 @@ const skillsRoutes = require('./routes/skills');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
+const corsOptions = {
+  origin: 'http://localhost:3000',  // your React app origin
+  credentials: true,                // allow cookies/auth headers
+};
+app.use(cors(corsOptions));
 
 // Middleware
-app.use(cors());
+//app.use(cors());
 app.use(express.json());
 
 // Routes
@@ -39,4 +44,23 @@ pool.getConnection((err, connection) => {
 // Start server
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
+});
+// Detect aborted client connections
+app.use((req, res, next) => {
+  req.on('close', () => {
+    if (!res.writableEnded) {
+      console.log('Request aborted by the client');
+      // Optional: Clean up resources or cancel ongoing operations here
+    }
+  });
+  next();
+});
+
+// Error handling middleware for unhandled exceptions
+app.use((err, req, res, next) => {
+  console.error('Unhandled server error:', err);
+  
+  if (!res.headersSent) {
+    res.status(500).json({ success: false, message: 'Internal Server Error' });
+  }
 });
