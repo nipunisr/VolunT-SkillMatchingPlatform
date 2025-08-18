@@ -1,4 +1,6 @@
 
+const { query } = require('../config/db');
+
 const {
   UpdateUserById,
   GetListOfUsers,

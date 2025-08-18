@@ -35,7 +35,7 @@
 
 
 import axios from 'axios';
-axios.defaults.withCredentials = true;
+//axios.defaults.withCredentials = true;
 
 // Optional: Set base URL globally if you call same server URLs
 // axios.defaults.baseURL = 'http://localhost:5000';

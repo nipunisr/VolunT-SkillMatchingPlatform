@@ -55,7 +55,7 @@ export const UserProvider = ({ children }) => {
           return; // no token, no user
         }
 
-        const { data } = await axios.get('/api/profile', {
+        const { data } = await axios.get('http://localhost:5000/api/profile', {
           headers: { Authorization: `Bearer ${token}` }
         });
         setCurrentUser(data);

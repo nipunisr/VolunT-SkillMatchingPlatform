@@ -149,6 +149,28 @@ const EventDetails = () => {
   const [error, setError] = useState("");
   const [savingField, setSavingField] = useState(null);
 
+  const saveField = async (field) => {
+  try {
+    const updatedField = { [field]: formState[field] };
+    const token = localStorage.getItem('token');
+    const updatedEvent = await updateEventById(event.opportunityId, updatedField, token);
+    setEvent((prev) => ({ ...prev, ...updatedEvent }));
+    toggleEdit(field);
+  } catch (err) {
+    if (err.response?.status === 404) {
+      setError('Event not found. It may have been deleted.');
+    } else if (err.code === 'ERR_CANCELED') {
+      // Request was canceled/aborted - handle or ignore gracefully
+      console.log('Request was canceled.');
+    } else {
+      setError(err.response?.data?.message || 'Update failed');
+    }
+  } finally {
+    setSavingField(null);
+  }
+};
+
+
   useEffect(() => {
     async function fetchEvent() {
       if (!opportunityId) return;
@@ -188,19 +210,7 @@ const EventDetails = () => {
   };
 
   // Save a field update to backend
-  const saveField = async (field) => {
-  try {
-    const updatedField = { [field]: formState[field] };
-    // Get JWT token from wherever you store (localStorage, context, redux)
-    const token = localStorage.getItem('token'); // Adjust if you use another method
-
-    const updatedEvent = await updateEventById(event.opportunityId, updatedField, token);
-    setEvent((prev) => ({ ...prev, ...updatedEvent }));
-    toggleEdit(field);
-  } catch (err) {
-    setError(err.response?.data?.message || 'Update failed');
-  }
-};
+  
 
 
   // Cancel editing: revert to original event data

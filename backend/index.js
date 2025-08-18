@@ -21,6 +21,17 @@ app.use(cors(corsOptions));
 //app.use(cors());
 app.use(express.json());
 
+app.use((req, res, next) => {
+  req.on('close', () => {
+    if (!res.writableEnded) {
+      console.log('Request aborted by the client');
+      req.aborted = true; 
+    }
+  });
+  next();
+});
+
+
 // Routes
 app.use('/user',userRoutes);
 app.use('/api/auth', authRoutes);
@@ -46,15 +57,6 @@ app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
 // Detect aborted client connections
-app.use((req, res, next) => {
-  req.on('close', () => {
-    if (!res.writableEnded) {
-      console.log('Request aborted by the client');
-      // Optional: Clean up resources or cancel ongoing operations here
-    }
-  });
-  next();
-});
 
 // Error handling middleware for unhandled exceptions
 app.use((err, req, res, next) => {

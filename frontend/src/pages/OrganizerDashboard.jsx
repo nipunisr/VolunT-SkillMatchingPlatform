@@ -163,7 +163,7 @@ const OrganizerDashboard = () => {
 
     try {
       // Use relative URL, assuming axios baseURL is configured
-      const response = await axios.post(`http://localhost:5000/api/events/organizer/${organizerId}`);
+      const response = await axios.get(`http://localhost:5000/api/events/organizer/${organizerId}`);
 
       if (response.data.success) {
         setEvents(response.data.events || []);
