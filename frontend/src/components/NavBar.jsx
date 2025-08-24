@@ -1,6 +1,8 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import logo from '../assets/images/logo.png';
+import LogoutButton from './LogoutButton';
+
 
 const NavBar = () => {
   return (
@@ -27,7 +29,13 @@ const NavBar = () => {
               </svg>
             </div>
           </Link>
-          <button className="px-4 py-2 text-m font-medium text-white bg-[#29142C] rounded-md">Log Out</button>
+          <div className="flex items-center px-4 py-2 text-m font-medium text-white bg-[#29142C] rounded-md">
+        <div 
+          className="bg-[#29142C] text-white  text-m font-medium" >
+         <LogoutButton />
+        </div>
+        </div>
+
         </div>
       </div>
     </nav>

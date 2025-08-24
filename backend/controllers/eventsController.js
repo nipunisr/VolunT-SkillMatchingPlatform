@@ -245,8 +245,6 @@ exports.getEventById = async (req, res) => {
   }
 };
 
-
-
 exports.getEventsByOrganizer = async (req, res) => {
   const organizerId = req.params.organizerId; // fixed typo
 
@@ -263,7 +261,6 @@ exports.getEventsByOrganizer = async (req, res) => {
     res.status(500).json({ success: false, message: 'Server error' });
   }
 };
-
 
 exports.getEventSkills = async (req, res) => {
   const opportunityId = req.params.opportunityId;
@@ -303,4 +300,39 @@ exports.updateEventById = async (req, res) => {
 
   const updatedEvent = await query('SELECT * FROM events WHERE opportunityId = ?', [opportunityId]);
   res.json(updatedEvent[0]);
+};
+
+exports.getEvents = async (req, res) => {
+  const { location, keyword, eventType } = req.query; // accept eventType param
+  let sql = 'SELECT * FROM events WHERE 1=1 ';
+  const params = [];
+
+  // Filter by location (partial match)
+  if (location) {
+    sql += 'AND location LIKE ? ';
+    params.push(`%${location}%`);
+  }
+
+  // Filter by keyword in title or description (partial match)
+  if (keyword) {
+    sql += 'AND (title LIKE ? OR description LIKE ?) ';
+    params.push(`%${keyword}%`, `%${keyword}%`);
+  }
+
+  // Filter by event type: "online", "physical", or skip if not provided
+  if (eventType === 'online') {
+    sql += 'AND isRemote = 1 '; // online
+  } else if (eventType === 'physical') {
+    sql += 'AND isRemote = 0 '; // physical
+  }
+
+  sql += 'ORDER BY startDate ASC';
+
+  try {
+    const rows = await query(sql, params);
+    res.json(rows);
+  } catch (error) {
+    console.error('Error fetching events:', error);
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
 };

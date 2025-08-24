@@ -147,7 +147,7 @@ import image from '../assets/images/org-dash.png';
 import { useUserContext } from '../context/UserContext';
 
 const OrganizerDashboard = () => {
-  const { currentUser } = useUserContext();
+  const { currentUser , loadingUser } = useUserContext();
   const organizerId = currentUser?.userId;
 
   const [events, setEvents] = useState([]);
@@ -179,18 +179,25 @@ const OrganizerDashboard = () => {
   }, [organizerId]);
 
   useEffect(() => {
+    
     if (organizerId) {
       fetchEvents();
     }
-  }, [organizerId, fetchEvents]);
+  }, [organizerId, fetchEvents]
 
-  if (!currentUser || !organizerId) {
+);
+
+  if ( loadingUser) {
     return (
       <div className="text-center py-8">
         <p>Loading user information...</p>
       </div>
     );
   }
+
+  if (!currentUser) {
+  return <p>Please log in</p>; // or redirect to login
+}
 
   return (
     <div className="bg-white min-h-screen">

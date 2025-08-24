@@ -29,7 +29,7 @@ const User = require('../models/User');
 
 const { pool } = require('../config/db');
 
-router.get('/profile', authMiddleware, async (req, res) => {
+router.get('/api/profile', authMiddleware, async (req, res) => {
   try {
     const userId = req.user.userId; // assume authMiddleware sets req.user
     const [rows] = await pool.query('SELECT userId, userName, email, phoneNumber, location, userType, profilePicture, isVerified, createdAt, updatedAt FROM users WHERE userId = ?', [userId]);

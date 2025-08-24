@@ -84,7 +84,7 @@ const Login = () => {
       if (user.userType === 'organizer') {
         navigate('/organizer/dashboard');
       } else {
-        navigate('/'); // or volunteer dashboard route
+        navigate('/volunteer/dashboard'); // or volunteer dashboard route
       }
     } catch (err) {
       setServerError(err.response?.data?.msg || 'Login failed.');

@@ -58,7 +58,7 @@ export const UserProvider = ({ children }) => {
         const { data } = await axios.get('http://localhost:5000/api/profile', {
           headers: { Authorization: `Bearer ${token}` }
         });
-        setCurrentUser(data);
+        setCurrentUser(data.user);
       } catch (err) {
         console.error('Failed to load profile', err);
         setCurrentUser(null);

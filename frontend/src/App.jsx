@@ -7,6 +7,7 @@ import { useAuth } from './context/AuthContext';
 import AuthLayout from './layouts/AuthLayout';
 import DashboardLayout from './layouts/DashboardLayout';
 import OrganizerLayout from './layouts/OrganizerLayout';
+import VolunteerLayout from './layouts/VolunteerLayout';
 
 import Login from './pages/Login';
 import VerifyEmail from './pages/VerifyEmail';
@@ -17,17 +18,21 @@ import ForgotPassword from './pages/ForgotPassword';
 import ResetPassword from './pages/ResetPassword';
 import PasswordUpdated from './pages/UpdatePassword';
 import MainLayout from "./layouts/VolunteerLayout";
-import HomePage from "./pages/VolunteerDashboard";
+import HomePage from "./pages/CommonDashboard";
 import EventPage from './pages/Opportunity';
 import MyEvents from './pages/MyEvents';
-import VolunteerProfile from './pages/VolunteerProfile';
+import VolunteerProfileEdit from './pages/VolunteerProfileEdit';
 import Notifications from './pages/Notifications';
 import UpdatedCreation from './pages/UpdatedAccountCreation';
+
 import OrgDashboard from './pages/OrganizerDashboard';
+import VolunteerDashboard from './pages/VolunteerDashboard';
+
 import Profile from './components/Profile';
 import ProtectedRoute from './components/ProtectedRoute'; 
-import EventDetails from './pages/EventDetails';
 
+import EventDetails from './pages/EventDetails';
+//import VolunEventDetails from './components/VolunEventDetails';
 
 // const App = () => {
 //  return (
@@ -86,7 +91,7 @@ const App = () => {
       <UserProvider>
         <Routes>
 
-          {/* Public Auth routes (no protection) */}
+          {/* Public Auth routes */}
           <Route element={<AuthLayout />}>
             <Route path="/login" element={<Login />} />
             <Route path="/verify-email" element={<VerifyEmail />} />
@@ -114,13 +119,11 @@ const App = () => {
               </ProtectedRoute>
             }
           >
-            
-            
             <Route path="/selected-opportunity" element={<EventPage />} />
             <Route path="/my-events" element={<MyEvents />} />
-            <Route path="/volunteer-profile" element={<VolunteerProfile />} />
+            
             <Route path="/notifications" element={<Notifications />} />
-            <Route path="/profile" element={<Profile />} />
+            
           </Route>
 
           {/* Organizer dashboard and related routes protected for organizers */}
@@ -136,17 +139,27 @@ const App = () => {
             <Route path="/events/:opportunityId" element={<EventDetails currentUserId={currentUserId} />} />
           </Route>
 
-          {/* Fallback DashboardLayout, if you have general users or other roles */}
-          {/* Or you can add here more protected routes for other roles */}
+          
+         <Route
+            element={
+              <ProtectedRoute allowedRoles={['volunteer']}>
+                <VolunteerLayout />
+              </ProtectedRoute>
+            }
+          >
+            <Route path="/volunteer/dashboard" element={<VolunteerDashboard />} />
+            <Route path="/volunteer/profile/edit" element={<VolunteerProfileEdit />}  />
+            
+          </Route>
+
+
           <Route
             element={
               <ProtectedRoute allowedRoles={['volunteer', 'organizer']}>
                 <DashboardLayout />
               </ProtectedRoute>
             }
-          >
-            {/* Add any generic protected routes here */}
-          </Route>
+          ></Route>
 
         </Routes>
       </UserProvider>

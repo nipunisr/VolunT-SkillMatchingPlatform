@@ -68,6 +68,12 @@ export const loginUser = (formData) => {
 export const getProfile = () => {
   // Now no need to pass headers manually, interceptor handles it
   return axios.get('http://localhost:5000/api/profile');
+
+};
+
+export const updateProfile = async (data) => {
+  const res = await axios.put('/api/profile', data);
+  return res.data;
 };
 
 export const createEvent = async (eventData) => {
@@ -99,4 +105,18 @@ export const getEventSkills = async (opportunityId) => {
 export const updateEventById = async (opportunityId, data) => {
   const res = await axios.put(`http://localhost:5000/api/events/${opportunityId}`, data);
   return res.data.event;
+};
+
+// export const fetchEvents = async ({ location, keyword }) => {
+//   const params = {};
+//   if (location) params.location = location;
+//   if (keyword) params.keyword = keyword;
+//   const response = await axios.get('http://localhost:5000/api/events', { params });
+//   if (!response.data) throw new Error('No data');
+//   return response.data;
+// };
+
+export const fetchEvents = async (filters = {}) => {
+  const res = await axios.get('http://localhost:5000/api/events', { params: filters });
+  return res.data;
 };
