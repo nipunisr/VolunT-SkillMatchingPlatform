@@ -7,7 +7,7 @@ const authRoutes = require('./routes/authRoutes');
 const eventsRoutes = require('./routes/events');
 const protectedRoutes = require('./routes/protectedRoutes');
 const skillsRoutes = require('./routes/skills');
-const profileRoutes = require('./routes/profile');
+
 
 
 const app = express();
@@ -17,10 +17,12 @@ const corsOptions = {
   credentials: true,                // allow cookies/auth headers
 };
 app.use(cors(corsOptions));
-
 // Middleware
 //app.use(cors());
 app.use(express.json());
+
+const profileRoutes = require('./routes/profile');
+
 
 app.use((req, res, next) => {
   req.on('close', () => {

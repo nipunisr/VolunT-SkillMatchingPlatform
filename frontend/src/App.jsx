@@ -21,7 +21,7 @@ import MainLayout from "./layouts/VolunteerLayout";
 import HomePage from "./pages/CommonDashboard";
 import EventPage from './pages/Opportunity';
 import MyEvents from './pages/MyEvents';
-import VolunteerProfileEdit from './pages/VolunteerProfileEdit';
+import VolunteerProfileEdit from './pages/VolunteerProfilePage';
 import Notifications from './pages/Notifications';
 import UpdatedCreation from './pages/UpdatedAccountCreation';
 

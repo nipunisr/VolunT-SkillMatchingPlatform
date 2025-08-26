@@ -16,21 +16,6 @@ const pool = mysql.createPool({
   queueLimit: 0,
 });
 
-// ✅ Then promisify query AFTER pool is defined
-// const query = util.promisify(pool.query).bind(pool);
-// const promisePool = pool.promise();
-
-
-// ✅ Optional: log connection success
-// pool.getConnection((err, connection) => {
-//   if (err) {
-//     console.error('❌ Error connecting to MySQL:', err);
-//     return;
-//   }
-//   console.log('✅ Successfully connected to Aiven MySQL');
-//   connection.release();
-// });
-
 
 async function queryWithRetry(sql, params, retries = 3) {
   try {
