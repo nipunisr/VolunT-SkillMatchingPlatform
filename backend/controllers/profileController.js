@@ -78,6 +78,7 @@
 
 const db = require('../config/db');
 
+
 exports.getProfile = async (req, res) => {
   try {
     const userId = req.user.userId;
@@ -93,8 +94,13 @@ exports.getProfile = async (req, res) => {
 
     if (!rows.length) return res.status(404).json({ success: false, message: 'Profile not found' });
 
+
     const profile = { ...rows[0] };
-    delete profile.password;
+    if(profile.skills) {
+  profile.skills = profile.skills.split(',').filter(s => s); // convert CSV string to array
+    } else {
+    profile.skills = [];
+    }
 
     res.json({ success: true, user: profile });
   } catch (error) {
@@ -113,12 +119,31 @@ const sanitizeDate = (date) => {
 exports.updateProfile = async (req, res) => {
   try {
     const userId = req.user.userId;
+
+    const toMysqlDatetime = (date) => {
+    if (!date) return null;
+    const dt = new Date(date);
+    const pad = (n) => (n < 10 ? '0' + n : n);
+    return dt.getFullYear() + '-' +
+         pad(dt.getMonth() + 1) + '-' +
+         pad(dt.getDate()) + ' ' +
+         pad(dt.getHours()) + ':' +
+         pad(dt.getMinutes()) + ':' +
+         pad(dt.getSeconds());
+    };
     const {
       userName, phoneNumber, location,
       skills, volunteeringMode, bio,
       availabilityStart, availabilityEnd,
       socialFacebook, socialTwitter, socialLinkedin,
     } = req.body;
+
+    const availabilityStartMysql = toMysqlDatetime(availabilityStart);
+    const availabilityEndMysql = toMysqlDatetime(availabilityEnd);
+    const safeSkills = Array.isArray(skills) ? skills.join(',') : (skills || '');
+
+    
+
 
     await db.query(
       'UPDATE users SET userName = ?, phoneNumber = ?, location = ? WHERE userId = ?',
@@ -138,7 +163,7 @@ exports.updateProfile = async (req, res) => {
          socialFacebook=VALUES(socialFacebook),
          socialTwitter=VALUES(socialTwitter),
          socialLinkedin=VALUES(socialLinkedin)`,
-      [userId, skills, volunteeringMode, bio, availabilityStart, availabilityEnd, socialFacebook, socialTwitter, socialLinkedin]
+      [userId, safeSkills, volunteeringMode, bio, availabilityStartMysql, availabilityEndMysql, socialFacebook, socialTwitter, socialLinkedin]
     );
 
     // Fetch updated profile
@@ -161,3 +186,4 @@ exports.updateProfile = async (req, res) => {
     res.status(500).json({ success: false, message: 'Server error' });
   }
 };
+

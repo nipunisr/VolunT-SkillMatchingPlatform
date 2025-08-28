@@ -1,134 +1,35 @@
 
-// import React, { useState, useEffect } from 'react';
-// import axios from 'axios';
-
-// const VolunteerProfileEdit = ({ profile = {}, onUpdate }) => {
-//   const [skillsOptions, setSkillsOptions] = useState([]);
-//   const [formData, setFormData] = useState({
-//     userName: profile.userName || '',
-//     email: profile.email || '',
-//     phoneNumber: profile.phoneNumber || '',
-//     location: profile.location || '',
-//     skills: profile.skills ? profile.skills.split(',') : [], // Array of skill ids/names
-//     volunteeringMode: profile.volunteeringMode || 'online',
-//     socialFacebook: profile.socialFacebook || '',
-//     socialTwitter: profile.socialTwitter || '',
-//     socialLinkedin: profile.socialLinkedin || '',
-//     bio: profile.bio || '',
-//     availabilityStart: profile.availabilityStart || '',
-//     availabilityEnd: profile.availabilityEnd || '',
-//   });
-
-//   // Fetch skills from backend for dropdown
-//   useEffect(() => {
-//     axios.get('http://localhost:5000/api/skills') // your API to fetch skills categories
-//       .then(res => {
-//         setSkillsOptions(res.data.skills || []);
-//       }).catch(err => {
-//         console.error('Failed to load skills options', err);
-//       });
-//   }, []);
-
-//   const handleChange = (e) => {
-//     const { name, value, type, checked, options } = e.target;
-//     if (name === 'skills') {
-//       // Multi select skills
-//       const selectedSkills = Array.from(options).filter(o => o.selected).map(o => o.value);
-//       setFormData(prev => ({ ...prev, skills: selectedSkills }));
-//     } else if (type === 'checkbox') {
-//       setFormData(prev => ({ ...prev, [name]: checked }));
-//     } else {
-//       setFormData(prev => ({ ...prev, [name]: value }));
-//     }
-//   };
-
-//   const handleSubmit = (e) => {
-//     e.preventDefault();
-//     // Convert skills array back to comma separated string for backend
-//     const dataToUpdate = {
-//       ...formData,
-//       skills: formData.skills.join(','),
-//     };
-//     onUpdate(dataToUpdate);
-//   };
-
-//   return (
-//     <form onSubmit={handleSubmit} className="max-w-xl p-4 bg-white rounded shadow"> 
-    
-//       <h2 className="text-xl font-semibold mb-4">Edit Volunteer Profile</h2>
-
-//       <label>Name</label>
-//       <input name="userName" value={formData.userName} onChange={handleChange} /> <br/>
-
-//       <label>Email</label>
-//       <input name="email" value={formData.email} disabled />  <br/> {/* Usually email not editable */}
-
-//       <label>Phone</label>
-//       <input name="phoneNumber" value={formData.phoneNumber} onChange={handleChange} /> <br/>
-
-//       <label>Location</label>
-//       <input name="location" value={formData.location} onChange={handleChange} /> <br/>
-
-//       <label>Skills (multi select)</label>
-//       <select 
-//         name="skills" 
-//         value={formData.skills} 
-//         onChange={handleChange} 
-//         multiple 
-//         size={5}
-//       >
-//         {skillsOptions.map(skill => (
-//           <option key={skill.skillId} value={skill.skillName}>{skill.skillName}</option>
-//         ))}
-//       </select> <br/>
-
-//       <label>Volunteering Mode</label>
-//       <select name="volunteeringMode" value={formData.volunteeringMode} onChange={handleChange}>
-//         <option value="online">Online</option>
-//         <option value="physical">Physical</option>
-//         <option value="both">Both</option>
-//       </select>
-
-//       <label>Facebook</label>
-//       <input name="socialFacebook" value={formData.socialFacebook} onChange={handleChange} />
-
-//       <label>Twitter</label>
-//       <input name="socialTwitter" value={formData.socialTwitter} onChange={handleChange} />
-
-//       <label>LinkedIn</label>
-//       <input name="socialLinkedin" value={formData.socialLinkedin} onChange={handleChange} />
-
-//       <label>Bio</label>
-//       <textarea name="bio" value={formData.bio} onChange={handleChange} />
-
-//       <label>Availability Start Date</label>
-//       <input type="date" name="availabilityStart" value={formData.availabilityStart} onChange={handleChange} />
-
-//       <label>Availability End Date</label>
-//       <input type="date" name="availabilityEnd" value={formData.availabilityEnd} onChange={handleChange} />
-
-//       <button type="submit" className="bg-purple-600 text-white px-4 py-2 rounded">
-//         Save Changes
-//       </button>
-//     </form>
-//   );
-// };
-
-// export default VolunteerProfileEdit;
-
-
-
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
+import Select from 'react-select';
 
 const VolunteerProfileEdit = ({ profile = {}, onUpdate }) => {
-  const [skillsOptions, setSkillsOptions] = useState([]);
+const [skillsOptions, setSkillsOptions] = useState([]);
+
+const skillsArray = Array.isArray(profile.skills)
+  ? profile.skills
+  : (typeof profile.skills === 'string' && profile.skills.length > 0)
+    ? profile.skills.split(',')   // convert CSV string to array
+    : [];                        // fallback to empty array
+
+const initialSelectedSkills = skillsArray.map(skillName => ({ skillName }));
+
+const formatDateForInput = (isoString) => {
+  if (!isoString) return '';
+  return isoString.split('T')[0]; // extracts "YYYY-MM-DD"
+};
+
+
+  
+
+
+
   const [formData, setFormData] = useState({
     userName: profile.userName || '',
     email: profile.email || '',
     phoneNumber: profile.phoneNumber || '',
     location: profile.location || '',
-    skills: profile.skills ? profile.skills.split(',') : [], // array of skills
+    skills: initialSelectedSkills,
     volunteeringMode: profile.volunteeringMode || 'online',
     socialFacebook: profile.socialFacebook || '',
     socialTwitter: profile.socialTwitter || '',
@@ -140,31 +41,44 @@ const VolunteerProfileEdit = ({ profile = {}, onUpdate }) => {
 
   useEffect(() => {
     axios.get('http://localhost:5000/api/skills')
-      .then(res => setSkillsOptions(res.data.skills || []))
+      .then(res => {
+        if (res.data.categories) {
+          const allSkills = [];
+          res.data.categories.forEach(category => {
+            category.skills.forEach(skill => {
+              allSkills.push({
+                value: skill.skillId,
+                label: skill.name,
+                category: category.name,
+              });
+            });
+          });
+          setSkillsOptions(allSkills);
+        }
+      })
       .catch(err => console.error('Failed to load skills options', err));
   }, []);
 
-  const handleChange = (e) => {
-    const { name, value, type, checked, options } = e.target;
+  const onSkillsChange = (selectedOptions) => {
+    setFormData(prev => ({
+      ...prev,
+      skills: selectedOptions || [],
+    }));
+  };
 
-    if (name === 'skills') {
-      const selectedSkills = Array.from(options).filter(o => o.selected).map(o => o.value);
-      setFormData(prev => ({ ...prev, skills: selectedSkills }));
-    } else if (type === 'checkbox') {
-      setFormData(prev => ({ ...prev, [name]: checked }));
-    } else {
-      setFormData(prev => ({ ...prev, [name]: value }));
-    }
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
     onUpdate({
       ...formData,
-      skills: formData.skills.join(','),
+      // Send array of skill IDs to backend
+      skills: formData.skills.map(skill => skill.value),
     });
   };
-
   return (
     <form onSubmit={handleSubmit} className="max-w-xl p-6 bg-white rounded-lg shadow-md mx-auto space-y-6">
 
@@ -223,21 +137,21 @@ const VolunteerProfileEdit = ({ profile = {}, onUpdate }) => {
 
       <div>
         <label htmlFor="skills" className="block font-medium mb-1">Skills (multi-select)</label>
-        <select
-          id="skills"
+        <Select
+          isMulti
           name="skills"
-          multiple
-          size={5}
+          options={skillsOptions}
           value={formData.skills}
-          onChange={handleChange}
-          className="w-full p-2 border border-gray-300 rounded"
-        >
-          {skillsOptions.map(skill => (
-            <option key={skill.skillId} value={skill.skillName}>
-              {skill.skillName}
-            </option>
-          ))}
-        </select>
+          onChange={onSkillsChange}
+          className="basic-multi-select"
+          classNamePrefix="select"
+          placeholder="Select your skills"
+          getOptionLabel={(e) => (
+            <div>
+              <span>{e.label}</span><small className="ml-2 text-gray-500">{e.category}</small>
+            </div>
+          )}
+        />
       </div>
 
       <div>
@@ -314,7 +228,7 @@ const VolunteerProfileEdit = ({ profile = {}, onUpdate }) => {
             type="date"
             id="availabilityStart"
             name="availabilityStart"
-            value={formData.availabilityStart}
+            value={formatDateForInput(formData.availabilityStart)}
             onChange={handleChange}
             className="w-full p-2 border border-gray-300 rounded"
           />
@@ -325,7 +239,7 @@ const VolunteerProfileEdit = ({ profile = {}, onUpdate }) => {
             type="date"
             id="availabilityEnd"
             name="availabilityEnd"
-            value={formData.availabilityEnd}
+            value={formatDateForInput(formData.availabilityEnd)}
             onChange={handleChange}
             className="w-full p-2 border border-gray-300 rounded"
           />
