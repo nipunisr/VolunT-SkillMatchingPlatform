@@ -6,25 +6,30 @@ import Select from 'react-select';
 const VolunteerProfileEdit = ({ profile = {}, onUpdate }) => {
 const [skillsOptions, setSkillsOptions] = useState([]);
 
-const skillsArray = Array.isArray(profile.skills)
-  ? profile.skills
-  : (typeof profile.skills === 'string' && profile.skills.length > 0)
-    ? profile.skills.split(',')   // convert CSV string to array
-    : [];                        // fallback to empty array
+// const skillsArray = Array.isArray(profile.skills)
+//   ? profile.skills
+//   : (typeof profile.skills === 'string' && profile.skills.length > 0)
+//     ? profile.skills.split(',')   // convert CSV string to array
+//     : [];                        // fallback to empty array
 
-const initialSelectedSkills = skillsArray.map(skillName => ({ skillName }));
+// const initialSelectedSkills = skillsArray.map(skillName => ({ skillName }));
+
+const initialSelectedSkills = [];
+
+if (Array.isArray(profile.skills)) {
+  profile.skills.forEach(category => {
+    category.skills.forEach(skill => {
+      initialSelectedSkills.push({ value: skill.skillId, label: skill.name });
+    });
+  });
+}
 
 const formatDateForInput = (isoString) => {
   if (!isoString) return '';
   return isoString.split('T')[0]; // extracts "YYYY-MM-DD"
 };
 
-
-  
-
-
-
-  const [formData, setFormData] = useState({
+   const [formData, setFormData] = useState({
     userName: profile.userName || '',
     email: profile.email || '',
     phoneNumber: profile.phoneNumber || '',
