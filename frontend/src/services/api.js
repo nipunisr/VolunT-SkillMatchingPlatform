@@ -98,25 +98,16 @@ export const getEventSkills = async (opportunityId) => {
   return data.skills || [];
 };
 
-// export const updateEventById = async (opportunityId, data) => {
-//   const res = await axios.put(`http://localhost:5000/api/events/${opportunityId}`, data);
-//   return res.data.event;
-// };
 export const updateEventById = async (opportunityId, data) => {
   const res = await axios.put(`http://localhost:5000/api/events/${opportunityId}`, data);
   return res.data.event;
 };
 
-// export const fetchEvents = async ({ location, keyword }) => {
-//   const params = {};
-//   if (location) params.location = location;
-//   if (keyword) params.keyword = keyword;
-//   const response = await axios.get('http://localhost:5000/api/events', { params });
-//   if (!response.data) throw new Error('No data');
-//   return response.data;
-// };
-
 export const fetchEvents = async (filters = {}) => {
   const res = await axios.get('http://localhost:5000/api/events', { params: filters });
   return res.data;
+};
+
+export const saveVolunteerRequest = (data) => {
+  return axios.post('http://localhost:5000/api/volunteers/request', data);
 };

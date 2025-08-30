@@ -7,6 +7,7 @@ const authRoutes = require('./routes/authRoutes');
 const eventsRoutes = require('./routes/events');
 const protectedRoutes = require('./routes/protectedRoutes');
 const skillsRoutes = require('./routes/skills');
+const volunteerEventRoutes = require('./routes/volunteerEvents');
 
 
 
@@ -42,6 +43,7 @@ app.use('/api/events', eventsRoutes);
 app.use('/api', protectedRoutes);
 app.use('/api/skills', skillsRoutes);
 app.use('/api/profile', profileRoutes);
+app.use('/api/volunteers', volunteerEventRoutes);
 
 
 

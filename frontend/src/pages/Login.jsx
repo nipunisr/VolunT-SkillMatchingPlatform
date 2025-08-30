@@ -83,7 +83,7 @@ const Login = () => {
       // Redirect based on userType
       if (user.userType === 'organizer') {
         navigate('/organizer/dashboard');
-      } else {
+      } else if (user.userType === 'volunteer') {
         navigate('/volunteer/dashboard'); // or volunteer dashboard route
       }
     } catch (err) {

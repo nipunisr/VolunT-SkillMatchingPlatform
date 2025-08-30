@@ -32,6 +32,7 @@ import Profile from './components/Profile';
 import ProtectedRoute from './components/ProtectedRoute'; 
 
 import EventDetails from './pages/EventDetails';
+import VolunteerEventDetails from './pages/VolunteerEventDetails';
 //import VolunEventDetails from './components/VolunEventDetails';
 
 // const App = () => {
@@ -149,7 +150,8 @@ const App = () => {
           >
             <Route path="/volunteer/dashboard" element={<VolunteerDashboard />} />
             <Route path="/volunteer/profile/edit" element={<VolunteerProfileEdit />}  />
-            
+            <Route path="/volunteer/dashboard/:opportunityId" element={<VolunteerEventDetails />} />
+
           </Route>
 
 

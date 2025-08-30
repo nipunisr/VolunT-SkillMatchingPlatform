@@ -33,7 +33,7 @@ const EventCard = ({ event }) => {
       {/* Buttons */}
       <div className="flex flex-col space-y-3">
        <button
-          onClick={() => navigate(`/events/${event.opportunityId}`)}
+          onClick={() => navigate(`/volunteer/dashboard/${event.opportunityId}`)}
           className="bg-[#E17335] text-white rounded-full py-3 font-semibold shadow-md hover:bg-[#29144C] transition"
         >
           More Information
