@@ -58,9 +58,9 @@ const OrganizerNavbar = () => {
       </div>
       <div className="flex gap-8">
         <Link to="/organizer/dashboard" className="font-semibold text-[#E17335]">Home</Link>
-        <Link to="/organizer/applicants">Applicants</Link>
+        <Link to="/organizer/applications">Applications</Link>
         <Link to="/organizer/notifications">Notifications</Link>
-        <Link to="/about">About Us</Link>
+        <Link to="/about-us">About Us</Link>
       </div>
       <div className="flex items-center gap-4">
         <div 

@@ -10,7 +10,7 @@ const NavBar = () => {
       <div className="container flex items-center justify-between px-4 mx-auto ">
         <div className="flex items-center">
           <Link to="/" className="flex items-center">
-            <img src={logo} viewBox="0 0 200 200" className="w-28 h-28 text-[#E17335]"/>
+            <img src={logo} alt="Company Logo" viewBox="0 0 200 200" className="w-28 h-28 text-[#E17335]"/>
           </Link>
         </div>
         
@@ -18,7 +18,7 @@ const NavBar = () => {
           <Link to="/" className="font-medium text-[#E17335]">Home</Link>
           <Link to="/my-events" className="text-gray-700 transition-colors hover:text-[#E17335]">My Events</Link>
           <Link to="/notifications" className="text-gray-700 transition-colors hover:text[#E17335]">Notifications</Link>
-          <Link to="/about" className="text-gray-700 transition-colors hover:text-[#E17335]">About Us</Link>
+          <Link to="/about-us" className="text-gray-700 transition-colors hover:text-[#E17335]">About Us</Link>
         </div>
         
         <div className="flex items-center space-x-4">

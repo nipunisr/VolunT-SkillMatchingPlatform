@@ -95,8 +95,12 @@ const EventDetails = () => {
       alert('Your volunteer request has been sent!');
       setModalOpen(false);
     } catch (err) {
+    if (err.response && err.response.data && err.response.data.message) {
+      alert(err.response.data.message);
+    } else {
       alert('Failed to send request, please try again.');
     }
+  }
   };
 
   useEffect(() => {

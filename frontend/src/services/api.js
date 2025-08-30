@@ -111,3 +111,22 @@ export const fetchEvents = async (filters = {}) => {
 export const saveVolunteerRequest = (data) => {
   return axios.post('http://localhost:5000/api/volunteers/request', data);
 };
+
+export const getMyRegisteredEvents = () => {
+  return axios.get('http://localhost:5000/api/volunteers/my-events')
+    .then(res => res.data);
+};
+
+export const getOrganizerEventsApplications = () => {
+  return axios.get('http://localhost:5000/api/organizer/events-applications').then(res => res.data);
+};
+
+export const updateApplicationStatus = ({ eventId, userId, status }) => {
+  return axios.put('http://localhost:5000/api/organizer/update-application-status', {
+    eventId,
+    userId,
+    status,
+  });
+};
+
+export const getStats = () => axios.get(`http://localhost:5000/api/stats`);

@@ -20,7 +20,10 @@ import PasswordUpdated from './pages/UpdatePassword';
 import MainLayout from "./layouts/VolunteerLayout";
 import HomePage from "./pages/CommonDashboard";
 import EventPage from './pages/Opportunity';
-import MyEvents from './pages/MyEvents';
+
+import MyRegisteredEvents from './pages/MyRegisteredEvents';
+import OrganizerApplications from './pages/OrganizerApplications';
+
 import VolunteerProfileEdit from './pages/VolunteerProfilePage';
 import Notifications from './pages/Notifications';
 import UpdatedCreation from './pages/UpdatedAccountCreation';
@@ -33,6 +36,10 @@ import ProtectedRoute from './components/ProtectedRoute';
 
 import EventDetails from './pages/EventDetails';
 import VolunteerEventDetails from './pages/VolunteerEventDetails';
+
+import AboutUs from './pages/AboutUs';
+
+//import ErrorBoundary from './components/ErrorBoundary';
 //import VolunEventDetails from './components/VolunEventDetails';
 
 // const App = () => {
@@ -105,10 +112,13 @@ const App = () => {
             <Route path="/updated-creation" element={<UpdatedCreation />} />
           </Route>
 
+          <Route path="/about-us" element={<AboutUs />} />
+
 
 
           <Route element={<DashboardLayout />}>
           <Route path="/" element={<HomePage />} />
+          <Route path="/about-us" element={<AboutUs />} />
           </Route>
 
 
@@ -121,8 +131,8 @@ const App = () => {
             }
           >
             <Route path="/selected-opportunity" element={<EventPage />} />
-            <Route path="/my-events" element={<MyEvents />} />
-            
+            {/* <Route path="/my-events" element={<MyEvents />} /> */}
+
             <Route path="/notifications" element={<Notifications />} />
             
           </Route>
@@ -138,6 +148,8 @@ const App = () => {
             <Route path="/organizer/dashboard" element={<OrgDashboard />} />
             <Route path="/profile" element={<Profile />} />
             <Route path="/events/:opportunityId" element={<EventDetails currentUserId={currentUserId} />} />
+            <Route path="/organizer/applications" element={<OrganizerApplications />} />
+            
           </Route>
 
           
@@ -151,6 +163,9 @@ const App = () => {
             <Route path="/volunteer/dashboard" element={<VolunteerDashboard />} />
             <Route path="/volunteer/profile/edit" element={<VolunteerProfileEdit />}  />
             <Route path="/volunteer/dashboard/:opportunityId" element={<VolunteerEventDetails />} />
+            <Route path="/my-events" element={<MyRegisteredEvents />} />
+            
+
 
           </Route>
 
@@ -161,7 +176,9 @@ const App = () => {
                 <DashboardLayout />
               </ProtectedRoute>
             }
-          ></Route>
+          >
+          
+          </Route>
 
         </Routes>
       </UserProvider>

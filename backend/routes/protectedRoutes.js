@@ -45,7 +45,4 @@ router.get('/api/profile', authMiddleware, async (req, res) => {
   }
 });
 
-
-
-
 module.exports = router;

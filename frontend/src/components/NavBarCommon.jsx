@@ -19,7 +19,7 @@ const NavBarCommon = () => {
         
         <div className="hidden text-xl font-medium space-x-11 md:flex">
           <Link to="/" className="font-medium text-[#E17335]">Home</Link>
-          <Link to="/about" className="text-gray-700 hover:text-[#E17335] transition-colors">
+          <Link to="/about-us" className="text-gray-700 hover:text-[#E17335] transition-colors">
             About Us
           </Link>
         </div>
