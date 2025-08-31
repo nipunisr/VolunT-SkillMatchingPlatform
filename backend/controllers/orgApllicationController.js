@@ -5,10 +5,9 @@ exports.getEventsWithApplications = async (req, res) => {
     const organizerId = req.user?.userId;
     if (!organizerId) return res.status(401).json({ success: false, message: 'Unauthorized' });
 
-    // Get organizer's events with applications and volunteer details
     const sql = `
       SELECT ev.opportunityId as eventId, ev.title, ev.startDate, ev.endDate,
-             vol.userId as volunteerId, vol.status, vol.message,
+             vol.id as applicationId, vol.userId as volunteerId, vol.status, vol.message,
              usr.userId, usr.userName, usr.email, usr.phoneNumber
       FROM events ev
       LEFT JOIN event_volunteers vol ON ev.opportunityId = vol.eventId
@@ -19,7 +18,6 @@ exports.getEventsWithApplications = async (req, res) => {
 
     const rows = await query(sql, [organizerId]);
 
-    // Group data event-wise:
     const events = {};
 
     rows.forEach(row => {
@@ -34,6 +32,8 @@ exports.getEventsWithApplications = async (req, res) => {
       }
       if (row.volunteerId) {
         events[row.eventId].applications.push({
+          applicationId: row.applicationId, 
+          id: row.applicationId, 
           eventId: row.eventId,
           volunteerId: row.userId,
           status: row.status,

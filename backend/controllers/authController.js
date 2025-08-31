@@ -4,7 +4,6 @@ const { promisePool,query } = require('../config/db');
 const User = require('../models/User');
 const Volunteer = require('../models/Volunteer');
 const Organizer = require('../models/Organizer');
-//const { sendVerificationEmail } = require('../services/emailService');
 const { LoginNow } = require("../models/Auth");
 
 
@@ -108,22 +107,6 @@ exports.login = async (req, res) => {
     res.status(500).json({ success: false, message: 'Internal server error' });
   }
 };
-
-
-
-
-
-// exports.login = async (req, res) => {       // <-- original
-//   const authCredentials = req.body;
-//   console.log("line6");
-//   console.log(authCredentials);
-//   const loginSuccess = await LoginNow(authCredentials);
-//   console.log("Login result:", loginSuccess);
-
-
-//   // TODO: Typically check and handle "loginFailed" etc here
-//   return res.json(loginSuccess);
-// };
 
 
 

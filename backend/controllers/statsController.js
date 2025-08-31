@@ -1,4 +1,3 @@
-// controllers/statsController.js
 const { pool } = require("../config/db");
 
 const getStats = async (req, res) => {
@@ -18,4 +17,4 @@ const getStats = async (req, res) => {
   }
 };
 
-module.exports = { getStats };  // ✅ CommonJS export
+module.exports = { getStats };  

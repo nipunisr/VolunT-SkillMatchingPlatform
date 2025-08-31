@@ -1,167 +1,4 @@
 
-
-// const { promisePool, query } = require('../config/db');
-
-// exports.createEvent = async (req, res) => {
-//   try {
-//     const {
-//       title,
-//       description,
-//       requiredSkill,
-//       startDate,
-//       endDate,
-//       location,
-//       isRemote,
-//       maxVolunteers,
-//       status,
-//       userId
-//     } = req.body;
-
-//     console.log('Create Event received data:', req.body); 
-
-//     if (!userId) {
-//     return res.status(400).json({ success: false, message: 'userId is required' });
-//   }
-//     // Simple validation (optional)
-//     if (!title || !description || !startDate || !endDate || !location || !maxVolunteers || !userId) {
-//       return res.status(400).json({ success: false, message: 'Missing required fields.' });
-//     }
-
-//     const sql = `
-//       INSERT INTO events (title, description, requiredSkill, startDate, endDate, location, isRemote, maxVolunteers, status, userId, createdAt)
-//       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())
-//     `;
-    
-//     const values = [
-//       title,
-//       description,
-//       requiredSkill,
-//       startDate,
-//       endDate,
-//       location,
-//       isRemote,
-//       maxVolunteers,
-//       status,
-//       userId
-//     ];
-
-//     const result = await query(sql, values);
-
-//     // result.insertId will be the new event ID
-//     return res.status(201).json({ success: true, event: { eventId: result.insertId, ...req.body } });
-//   } catch (error) {
-//     console.error('Error creating event:', error);
-//     return res.status(500).json({ success: false, message: 'Server error.' });
-//   }
-  
-// };
-
-// exports.getEventsByOrganizer = async (req, res) => {
-//   const organizerId = req.params.organizerId;
-
-//   try {
-//     // Query to fetch events by organizer ID (adjust table/column names accordingly)
-//     const [rows] = await promisePool.query(
-//       'SELECT * FROM events WHERE userId = ?',
-//       [organizerId]
-//     );
-
-//     res.json({ success: true, events: rows });
-//   } catch (error) {
-//     console.error('Error fetching events:', error);
-//     res.status(500).json({ success: false, message: 'Server error' });
-//   }
-// };
-
-// exports.createEvent = async (req, res) => {
-//   // Your existing createEvent logic...
-// };
-
-// exports.updateEvent = async (req, res) => {
-//   // Implement update logic (find event by id, update fields)
-// };
-
-// exports.deleteEvent = async (req, res) => {
-//   // Implement delete logic (find event by id, delete it)
-// };
-
-
-
-
-
-
-// exports.createEvent = async (req, res) => {
-//   try {
-//     // Use userId from authenticated token set by authMiddleware, NOT from client body
-//     const userId = req.user?.userId;
-//     if (!userId) {
-//       return res.status(401).json({ success: false, message: 'Unauthorized: userId missing' });
-//     }
-
-//     const {
-//       title,
-//       description,
-//       requiredSkill,
-//       startDate,
-//       endDate,
-//       location,
-//       isRemote,
-//       maxVolunteers,
-//       status,
-//     } = req.body;
-
-//     console.log('Create Event received data:', req.body);
-
-//     // Basic validation of required fields
-//     if (!title || !description || !startDate || !endDate || !location || !maxVolunteers) {
-//       return res.status(400).json({ success: false, message: 'Missing required fields.' });
-//     }
-
-//     // Convert isRemote to 0 or 1 if boolean
-//     const isRemoteValue = isRemote ? 1 : 0;
-
-//     const sql = `
-//       INSERT INTO events 
-//       (title, description, requiredSkill, startDate, endDate, location, isRemote, maxVolunteers, status, userId, createdAt)
-//       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())
-//     `;
-
-//     const values = [
-//       title.trim(),
-//       description.trim(),
-//       requiredSkill ? requiredSkill.trim() : null,
-//       startDate,
-//       endDate,
-//       location.trim(),
-//       isRemoteValue,
-//       maxVolunteers,
-//       status || 'active',
-//       userId,
-//     ];
-
-//     const result = await query(sql, values);
-
-//     return res.status(201).json({ 
-//       success: true, 
-//       event: { 
-//         eventId: result.insertId, 
-//         title, 
-//         description, 
-//         requiredSkill, 
-//         startDate, 
-//         endDate, 
-//         location, 
-//         isRemote: isRemoteValue, 
-//         maxVolunteers, 
-//         status: status || 'active', 
-//         userId 
-//       } 
-//     });
-//   } catch (error) {
-//     console.error('Error creating event:', error);
-//     return res.status(500).json({ success: false, message: 'Server error.' });
-//   }
-// };
 const { query } = require('../config/db');
 const pool = require('../config/db').pool; 
 
@@ -175,8 +12,7 @@ exports.createEvent = async (req, res) => {
     const {
       title,
       description,
-      requiredSkills, // Array of skillIds [1, 2, 3]
-      startDate,
+      requiredSkills, 
       endDate,
       location,
       isRemote,
@@ -194,7 +30,6 @@ exports.createEvent = async (req, res) => {
 
     const isRemoteValue = isRemote ? 1 : 0;
 
-    // Insert event
     const insertEventSql = `
       INSERT INTO events 
       (title, description, startDate, endDate, location, isRemote, maxVolunteers, status, userId, createdAt)
@@ -214,7 +49,6 @@ exports.createEvent = async (req, res) => {
 
     const eventId = result.insertId;
 
-    // Insert required skills for event
     const skillValues = requiredSkills.map(skillId => [eventId, skillId]);
     const insertSkillsSql = 'INSERT INTO event_skills (opportunityId, skillId) VALUES ?';
     await query(insertSkillsSql, [skillValues]);
@@ -237,7 +71,7 @@ exports.getEventById = async (req, res) => {
       return res.status(404).json({ success: false, message: "Event not found" });
     }
 
-    const event = events[0]; // Extract first event
+    const event = events[0]; 
     res.json({ success: true, event });
   } catch (error) {
     console.error(error);
@@ -246,10 +80,9 @@ exports.getEventById = async (req, res) => {
 };
 
 exports.getEventsByOrganizer = async (req, res) => {
-  const organizerId = req.params.organizerId; // fixed typo
+  const organizerId = req.params.organizerId; 
 
   try {
-    // Use your existing query function or the pool
     const rows = await query(
       'SELECT * FROM events WHERE userId = ?',
       [organizerId]
@@ -284,13 +117,12 @@ exports.updateEventById = async (req, res) => {
   const { opportunityId } = req.params;
   const updates = req.body;
 
-  // Check if event exists
+ 
   const rows = await query('SELECT * FROM events WHERE opportunityId = ?', [opportunityId]);
   if (!rows.length) {
     return res.status(404).json({ success: false, message: 'Event not found' });
   }
 
-  // Build dynamic update
   const fields = Object.keys(updates);
   const values = Object.values(updates);
   const setClause = fields.map(f => `${f} = ?`).join(', ');
@@ -303,23 +135,22 @@ exports.updateEventById = async (req, res) => {
 };
 
 exports.getEvents = async (req, res) => {
-  const { location, keyword, eventType } = req.query; // accept eventType param
+  const { location, keyword, eventType } = req.query; 
   let sql = 'SELECT * FROM events WHERE 1=1 ';
   const params = [];
 
-  // Filter by location (partial match)
+ 
   if (location) {
     sql += 'AND location LIKE ? ';
     params.push(`%${location}%`);
   }
 
-  // Filter by keyword in title or description (partial match)
+  
   if (keyword) {
     sql += 'AND (title LIKE ? OR description LIKE ?) ';
     params.push(`%${keyword}%`, `%${keyword}%`);
   }
-
-  // Filter by event type: "online", "physical", or skip if not provided
+  
   if (eventType === 'online') {
     sql += 'AND isRemote = 1 '; // online
   } else if (eventType === 'physical') {
@@ -337,12 +168,12 @@ exports.getEvents = async (req, res) => {
   }
 };
 
-// In your eventController.js
+
 exports.getMatchingEvents = async (req, res) => {
   try {
     const userId = req.user.userId;
     
-    // Get volunteer's profile
+    
     const volunteerQuery = `
       SELECT u.location, v.availabilityStart, v.availabilityEnd
       FROM users u
@@ -358,7 +189,7 @@ exports.getMatchingEvents = async (req, res) => {
 
     const { location, availabilityStart, availabilityEnd } = volunteer;
     
-    // Query to find matching events
+   
     const eventsQuery = `
       SELECT e.*
       FROM events e

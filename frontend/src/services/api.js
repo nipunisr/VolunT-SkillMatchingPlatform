@@ -132,6 +132,18 @@ export const updateApplicationStatus = ({ eventId, userId, status }) => {
 export const getStats = () => axios.get(`http://localhost:5000/api/stats`);
 
 
+export const createRecommendation = async (data) => {
+  return axios.post('http://localhost:5000/api/recommendations', data);
+};
+
+export const getVolunteerRecommendations = async (volunteerId) => {
+  return axios.get(`http://localhost:5000/api/recommendations/volunteer/${volunteerId}`);
+};
+
+
+
+
+
 export const fetchMatchingEvents = async () => {
   try {
     const response = await axios.get('http://localhost:5000/api/events/matching');

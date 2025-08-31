@@ -1,16 +1,14 @@
 
 const { log } = require("console");
-// //const { db } = require('../config/db');
 const { query } = require('../config/db');
 const util = require("util");
 const bcrypt = require('bcrypt');
-//const query = util.promisify(db.query).bind(db);
-// Returns User With Id
+
 const GetUserById = async (id) => {
   const queryString = 'SELECT * FROM users WHERE id = ?';
   try {
     const results = await query(queryString, [id]);
-    return results[0]; // Assuming the query returns only one user
+    return results[0]; 
   } catch (error) {
     throw error;
   }
@@ -33,7 +31,6 @@ const UpdateProfileById = async (id, updatedProfileData) => {
   }
   
 };
-// Returns List of Users
 const UpdateUserById = async (id, updatedUserData) => {
   const {
     fName,
@@ -81,66 +78,7 @@ const DeleteUserById = async (id) => {
 };
 
 
-// const saltRounds = 10;
-
-// const AddNewUser = async (user) => {
-//   const { fName, lName, userName, password, email, userType, location } = user;
-
-//   try {
-//     // 🔐 Hash the password
-//     const hashedPassword = await bcrypt.hash(password, saltRounds);
-
-//     const queryString = 'INSERT INTO users (fName, lName, userName, password, email, userType, location) VALUES (?, ?, ?, ?, ?, ?, ?)';
-//     const values = [fName, lName, userName, hashedPassword, email, userType, location];
-
-//     const results = await query(queryString, values);
-//     return { success: true, message: "User Successfully Created" };
-
-//   } catch (error) {
-//     if (error.code === 'ER_DUP_ENTRY') {
-//       return { success: false, message: 'Email already exists' };
-//     }
-//     throw error;
-//   }
-// };
-
 const saltRounds = 10;
-
-// const AddNewUser = async (user) => {
-//   const {
-//     userName,
-//     email,
-//     phoneNumber = null,
-//     location = null,
-//     password,
-//     userType
-//   } = user;
-
-//   // Basic validation
-//   if (!userName || !password || !email || !userType) {
-//     return { success: false, message: 'Missing required fields' };
-//   }
-
-//   try {
-//     // Hash the password
-//     const hashedPassword = await bcrypt.hash(password, saltRounds);
-
-//     const queryString = `
-//       INSERT INTO users (userName, email, phoneNumber, location, password, userType)
-//       VALUES (?, ?, ?, ?, ?, ?)
-//     `;
-//     const values = [userName, email, phoneNumber, location, hashedPassword, userType];
-
-//     await query(queryString, values);
-//     return { success: true, message: "User Successfully Created" };
-
-//   } catch (error) {
-//     if (error.code === 'ER_DUP_ENTRY') {
-//       return { success: false, message: 'Email already exists' };
-//     }
-//     return { success: false, message: error.message || 'Database error' };
-//   }
-// };
 const AddNewUser = async (user) => {
   const {
     userName,
@@ -151,16 +89,13 @@ const AddNewUser = async (user) => {
     userType
   } = user;
 
-  // Basic validation
   if (!userName || !password || !email || !userType) {
     return { success: false, message: 'Missing required fields' };
   }
 
   try {
-    // Hash the password
     const hashedPassword = await bcrypt.hash(password, saltRounds);
 
-    // Insert into users table and get inserted userId
     const insertUserQuery = `
       INSERT INTO users (userName, email, phoneNumber, location, password, userType)
       VALUES (?, ?, ?, ?, ?, ?)
@@ -168,9 +103,8 @@ const AddNewUser = async (user) => {
     const values = [userName, email, phoneNumber, location, hashedPassword, userType];
 
     const result = await query(insertUserQuery, values);
-    const userId = result.insertId; // <-- Get the inserted userId
+    const userId = result.insertId; 
 
-    // Insert into volunteer or organizer table with userId only
     console.log('Inserting into role table for userType:', userType);
 
 try {
@@ -183,10 +117,6 @@ try {
   console.error('Error inserting into role table:', err);
   return { success: false, message: 'Failed to insert role data' };
 }
-    //  else {
-    //   // Optional: handle unexpected userType
-    //   return { success: false, message: 'Invalid user type' };
-    // }
 
     return { success: true, message: "User Successfully Created", userId };
 
@@ -200,18 +130,16 @@ try {
 
 
 const updateUserAndChild = async (userId, userData, childData) => {
-  const connection = await db.getConnection(); // get connection from your pool
+  const connection = await db.getConnection(); 
   try {
     await connection.beginTransaction();
 
-    // Update users table
     await connection.query(
       `UPDATE users SET userName = ?, email = ?, phoneNumber = ?, location = ? WHERE userId = ?`,
       [userData.userName, userData.email, userData.phoneNumber, userData.location, userId]
     );
 
     if (userData.userType === 'organizer') {
-      // Update organizers table
       const [result] = await connection.query(
         `UPDATE organizers SET organizationName = ?, registeredNumber = ?, website = ?, contactPerson = ?, address = ? WHERE userId = ?`,
         [
@@ -224,7 +152,6 @@ const updateUserAndChild = async (userId, userData, childData) => {
         ]
       );
 
-      // If no organizer row exists, insert it
       if (result.affectedRows === 0) {
         await connection.query(
           `INSERT INTO organizers (userId, organizationName, registeredNumber, website, contactPerson, address)
@@ -240,7 +167,6 @@ const updateUserAndChild = async (userId, userData, childData) => {
         );
       }
     } else if (userData.userType === 'volunteer') {
-      // Update volunteers table
       const [result] = await connection.query(
         `UPDATE volunteers SET skills = ?, availability = ? WHERE userId = ?`,
         [
@@ -250,7 +176,6 @@ const updateUserAndChild = async (userId, userData, childData) => {
         ]
       );
 
-      // If no volunteer row exists, insert it
       if (result.affectedRows === 0) {
         await connection.query(
           `INSERT INTO volunteers (userId, skills, availability) VALUES (?, ?, ?)`,
@@ -282,7 +207,6 @@ const SendMessage = async (message, senderUserId) => {
     await query(insertQuery, [senderUserId ,message]);
     console.log("----------------")
     console.log(senderUserId)
-    // Remove older messages if more than three
     const deleteQuery = `
     DELETE FROM messages
     WHERE id NOT IN (
@@ -306,20 +230,7 @@ const SendMessage = async (message, senderUserId) => {
 
 
 
-//const saltRounds = 10; 
 
-// const updateCred = async (id, username, newPassword) => {
-//     try {
-//         const hashedPassword = await bcrypt.hash(newPassword, saltRounds);
-//         const sql = `UPDATE users SET username = ?, password = ? WHERE id = ?`;
-//         const [result] = await db.query(sql, [ id, username, hashedPassword]);
-
-//         return result.affectedRows > 0;
-//     } catch (error) {
-//         console.log('Error updating credentials :', error);
-//         throw error;
-//     }
-// };
 const updateCred = async (username ,id, newPassword) => {
   try {
       const hashedPassword = await bcrypt.hash(newPassword, saltRounds);

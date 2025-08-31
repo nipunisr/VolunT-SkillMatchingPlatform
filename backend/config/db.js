@@ -2,9 +2,7 @@ const path = require('path');
 require('dotenv').config({ path: path.join(__dirname, '..', '.env') });
 
 const mysql = require('mysql2/promise');
-//const util = require('util');
 
-// ✅ First create the pool
 const pool = mysql.createPool({
   host: process.env.DB_HOST,
   user: process.env.DB_USER,
@@ -19,7 +17,7 @@ const pool = mysql.createPool({
 
 async function queryWithRetry(sql, params, retries = 3) {
   try {
-    // pool.query is already promise-based!
+   
     const [rows] = await pool.query(sql, params);
     return rows;
   } catch (error) {
