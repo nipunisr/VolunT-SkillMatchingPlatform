@@ -33,7 +33,7 @@ const VolunteerProfilePage = () => {
 
   const handleUpdate = async (updatedData) => {
     try {
-      const skillNames = updatedData.skills; 
+      //const skillNames = updatedData.skills; 
       const token = localStorage.getItem('token');
       const updatedUser = await updateUserProfile(updatedData, token);
       setProfile(updatedUser);

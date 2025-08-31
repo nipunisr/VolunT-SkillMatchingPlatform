@@ -65,49 +65,50 @@ const CreateAccount = () => {
     return Object.keys(newErrors).length === 0;
   };
 
-  const updateProfile = async () => {
-    if (!currentUser) {
-      alert('User not logged in');
-      return;
-    }
-    const userId = currentUser.userId || currentUser.id;
+  // const updateProfile = async () => {
+  //   if (!currentUser) {
+  //     alert('User not logged in');
+  //     return;
+  //   }
+  //   const userId = currentUser.userId || currentUser.id;
 
-    const userData = {
-      userName: formData.name,
-      email: formData.email,
-      phoneNumber: formData.phoneNumber,
-      location: formData.location,
-      userType: showOrgField ? 'organizer' : 'volunteer'
-    };
+  //   const userData = {
+  //     userName: formData.name,
+  //     email: formData.email,
+  //     phoneNumber: formData.phoneNumber,
+  //     location: formData.location,
+  //     userType: showOrgField ? 'organizer' : 'volunteer'
+  //   };
 
-    const childData = showOrgField
-      ? {
-          organizationName: formData.organizationName,
-          registeredNumber: formData.registeredNumber,
-          website: formData.website,
-          contactPerson: formData.contactPerson,
-          address: formData.address
-        }
-      : {
-          skills: formData.skills,
-          availability: formData.availability
-        };
+  //   const childData = showOrgField
+  //     ? {
+  //         organizationName: formData.organizationName,
+  //         registeredNumber: formData.registeredNumber,
+  //         website: formData.website,
+  //         contactPerson: formData.contactPerson,
+  //         address: formData.address
+  //       }
+  //     : {
+  //         skills: formData.skills,
+  //         availability: formData.availability
+  //       };
 
-    try {
-      const response = await axios.put(`http://localhost:5000/user/update/${userId}`, {
-        userData,
-        childData
-      });
+  //   try {
+  //     const response = await axios.put(`http://localhost:5000/user/update/${userId}`, {
+  //       userData,
+  //       childData
+  //     });
 
-      if (response.data.success) {
-        alert('Profile updated successfully');
-      } else {
-        alert('Update failed: ' + response.data.message);
-      }
-    } catch (error) {
-      alert('Update error: ' + error.message);
-    }
-  };
+  //     if (response.data.success) {
+  //       alert('Profile updated successfully');
+  //     } else {
+  //       alert('Update failed: ' + response.data.message);
+  //     }
+  //   } catch (error) {
+  //     alert('Update error: ' + error.message);
+  //   }
+  // };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!validateForm()) return;

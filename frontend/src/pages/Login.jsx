@@ -2,11 +2,11 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useNavigate } from 'react-router-dom';
 import { loginUser } from '../services/api';
-import { useAuth } from '../context/AuthContext';
+//import { useAuth } from '../context/AuthContext';
 
 
 const Login = () => {
-  const { login } = useAuth();
+  //const { login } = useAuth();
   const [formData, setFormData] = useState({
     email: '',
     password: ''

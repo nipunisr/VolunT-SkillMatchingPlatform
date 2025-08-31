@@ -1,5 +1,4 @@
-import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useCallback,useState, useEffect } from 'react';
 import hand from '../assets/images/hand2hand.png';
 import { fetchEvents } from '../services/api';
 import EventCard from '../components/Ecards';
@@ -12,30 +11,30 @@ const HomePage = () => {
     const [loading, setLoading] = useState(true);
   
 
-  const loadEvents = async () => {
-      setLoading(true);
-      try {
-        const filters = {};
-  
-        if (searchCriteria === 'name') {
-          filters.keyword = keyword.trim();
-        } else if (searchCriteria === 'location') {
-          filters.location = keyword.trim();
-        } else if (searchCriteria === 'mode' && mode !== 'all') {
-          filters.eventType = mode;
-        }
-  
-        const data = await fetchEvents(filters);
-        setEvents(data);
-      } catch (err) {
-        setEvents([]);
+  const loadEvents = useCallback(async () => {
+    setLoading(true);
+    try {
+      const filters = {};
+
+      if (searchCriteria === 'name') {
+        filters.keyword = keyword.trim();
+      } else if (searchCriteria === 'location') {
+        filters.location = keyword.trim();
+      } else if (searchCriteria === 'mode' && mode !== 'all') {
+        filters.eventType = mode;
       }
-      setLoading(false);
-    };
-  
-    useEffect(() => {
-      loadEvents();
-    }, []);
+
+      const data = await fetchEvents(filters);
+      setEvents(data);
+    } catch (err) {
+      setEvents([]);
+    }
+    setLoading(false);
+  }, [searchCriteria, keyword, mode]);
+
+  useEffect(() => {
+    loadEvents();
+  }, [loadEvents]);
   
     const handleSearch = (e) => {
       e.preventDefault();

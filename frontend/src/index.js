@@ -4,7 +4,7 @@ import { AuthProvider } from './context/AuthContext';
 import './index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
-const socket = new WebSocket('ws://localhost:3000/ws');
+//const socket = new WebSocket('ws://localhost:3000/ws');
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(

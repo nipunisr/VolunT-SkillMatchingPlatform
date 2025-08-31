@@ -42,7 +42,6 @@ const CreateEventForm = ({ organizerId, onSuccess, onClose }) => {
     handleSubmit,
     formState: { errors },
     control,
-    setValue,
   } = useForm({
     resolver: yupResolver(eventSchema),
     defaultValues: { isRemote: false, status: 'active', requiredSkills: [] },
