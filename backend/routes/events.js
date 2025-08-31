@@ -50,6 +50,7 @@ const {
   getEventSkills,
   updateEventById,
   getEvents,
+  getMatchingEvents,
 } = require('../controllers/eventsController');
 
 // GET /api/events with optional filters: location, keyword
@@ -63,6 +64,8 @@ router.get('/:opportunityId/skills', getEventSkills);
 //router.put('/:opportunityId', authMiddleware, eventsController.updateEventById);
 router.put('/:opportunityId', authMiddleware, updateEventById);
 router.get('/organizer/:organizerId', authMiddleware, permit('organizer'), getEventsByOrganizer);
+
+router.get('/matching', authMiddleware, getMatchingEvents);
 
 module.exports = router;
 

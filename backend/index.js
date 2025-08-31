@@ -49,9 +49,6 @@ app.use('/api/organizer', organizerApplications);
 app.use('/api/stats', statsRoutes);
 
 
-
-
-
 // Test DB connection
 pool.getConnection((err, connection) => {
   if (err) {

@@ -336,3 +336,48 @@ exports.getEvents = async (req, res) => {
     res.status(500).json({ success: false, message: 'Server error' });
   }
 };
+
+// In your eventController.js
+exports.getMatchingEvents = async (req, res) => {
+  try {
+    const userId = req.user.userId;
+    
+    // Get volunteer's profile
+    const volunteerQuery = `
+      SELECT u.location, v.availabilityStart, v.availabilityEnd
+      FROM users u
+      JOIN volunteers v ON u.userId = v.userId
+      WHERE u.userId = ?
+    `;
+    
+    const [volunteer] = await query(volunteerQuery, [userId]);
+    
+    if (!volunteer) {
+      return res.status(404).json({ success: false, message: 'Volunteer not found' });
+    }
+
+    const { location, availabilityStart, availabilityEnd } = volunteer;
+    
+    // Query to find matching events
+    const eventsQuery = `
+      SELECT e.*
+      FROM events e
+      WHERE e.status = 'active'
+        AND (e.isRemote = true OR e.location = ?)
+        AND (e.startDate IS NULL OR e.startDate >= ?)
+        AND (e.endDate IS NULL OR e.endDate <= ?)
+      ORDER BY e.startDate ASC
+    `;
+    
+    const events = await query(eventsQuery, [
+      location || '', 
+      availabilityStart || new Date().toISOString().split('T')[0],
+      availabilityEnd || '2030-12-31'
+    ]);
+    
+    res.json({ success: true, events });
+  } catch (error) {
+    console.error('Error fetching matching events:', error);
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
+};
