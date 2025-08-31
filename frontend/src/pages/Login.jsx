@@ -2,8 +2,11 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useNavigate } from 'react-router-dom';
 import { loginUser } from '../services/api';
+//import { useAuth } from '../context/AuthContext';
+
 
 const Login = () => {
+  //const { login } = useAuth();
   const [formData, setFormData] = useState({
     email: '',
     password: ''
@@ -44,7 +47,6 @@ const Login = () => {
       [name]: value
     }));
     
-    // Clear the error when user starts typing
     if (errors[name]) {
       setErrors(prev => ({
         ...prev,
@@ -64,32 +66,31 @@ const Login = () => {
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    // Clear error on each submit
-    setServerError('');
+  e.preventDefault();
+  setServerError('');
 
-    if (validateForm()) {
-      setIsSubmitting(true);
-      try {
-        const response = await loginUser(formData);
-        const { user } = response.data;
+  if (validateForm()) {
+    setIsSubmitting(true);
+    try {
+      const response = await loginUser(formData);
+      const { user, token } = response.data;
 
-        // Save user to localStorage (optional)
-        localStorage.setItem('user', JSON.stringify(user));
+      localStorage.setItem('token', token);
+      localStorage.setItem('user', JSON.stringify(user));
 
-        // Redirect based on userType
-        if (user.userType === 'organizer') {
-          navigate('/organizer/dashboard');
-        } else {
-          navigate('/'); // or your volunteer dashboard
-        }
-      } catch (err) {
-        setServerError(err.response?.data?.msg || 'Login failed.');
-      } finally {
-        setIsSubmitting(false);
+      if (user.userType === 'organizer') {
+        navigate('/organizer/dashboard');
+      } else if (user.userType === 'volunteer') {
+        navigate('/volunteer/dashboard'); 
       }
+    } catch (err) {
+      setServerError(err.response?.data?.msg || 'Login failed.');
+    } finally {
+      setIsSubmitting(false);
     }
-  };
+  }
+};
+
   return (
     <div className="w-full">
       <div className="mb-8 text-center">

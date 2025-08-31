@@ -1,10 +1,8 @@
 const path = require('path');
 require('dotenv').config({ path: path.join(__dirname, '..', '.env') });
 
-const mysql = require('mysql2');
-const util = require('util');
+const mysql = require('mysql2/promise');
 
-// ✅ First create the pool
 const pool = mysql.createPool({
   host: process.env.DB_HOST,
   user: process.env.DB_USER,
@@ -16,17 +14,33 @@ const pool = mysql.createPool({
   queueLimit: 0,
 });
 
-// ✅ Then promisify query AFTER pool is defined
-const query = util.promisify(pool.query).bind(pool);
 
-// ✅ Optional: log connection success
-pool.getConnection((err, connection) => {
-  if (err) {
-    console.error('❌ Error connecting to MySQL:', err);
-    return;
+async function queryWithRetry(sql, params, retries = 3) {
+  try {
+   
+    const [rows] = await pool.query(sql, params);
+    return rows;
+  } catch (error) {
+    if (
+      retries > 0 &&
+      (error.code === 'ECONNRESET' ||
+        error.fatal ||
+        error.code === 'PROTOCOL_CONNECTION_LOST')
+    ) {
+      console.warn(`Query failed due to connection reset. Retrying... (${4 - retries})`);
+      return queryWithRetry(sql, params, retries - 1);
+    }
+    throw error;
   }
-  console.log('✅ Successfully connected to Aiven MySQL');
-  connection.release();
-});
+}
 
-module.exports = { pool, query };
+(async () => {
+  try {
+    const connection = await pool.getConnection();
+    console.log('✅ Successfully connected to Aiven MySQL');
+    connection.release();
+  } catch (err) {
+    console.error('❌ Error connecting to MySQL:', err);
+  }
+})();
+module.exports = { pool, query: queryWithRetry};

@@ -1,71 +1,102 @@
-import React, { useState } from 'react';
-import axios from 'axios';
-import { useForm } from 'react-hook-form';
+import React, { useEffect, useState } from 'react';
+import { useForm, Controller } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
 import { format } from 'date-fns';
 import { createEvent } from '../services/api';
+import SkillSelector from '../components/SkillSelector';
+import axios from 'axios';
 
 const eventSchema = yup.object().shape({
   title: yup.string().required('Title is required'),
   description: yup.string().required('Description is required'),
-  requiredSkill: yup.string().nullable(),
-  startDate: yup.date()
+  requiredSkills: yup
+    .array()
+    .of(yup.number())
+    .min(1, 'At least one skill must be selected')
+    .required('Required skills is required'),
+  startDate: yup
+    .date()
     .required('Start date is required')
     .min(new Date(), 'Start date must be in the future'),
-  endDate: yup.date()
+  endDate: yup
+    .date()
     .required('End date is required')
     .min(yup.ref('startDate'), 'End date must be after start date'),
   location: yup.string().required('Location is required'),
   isRemote: yup.boolean(),
-  maxVolunteers: yup.number()
+  maxVolunteers: yup
+    .number()
     .required('Max volunteers is required')
     .min(1, 'Must have at least 1 volunteer')
     .integer('Must be a whole number'),
-  status: yup.string().oneOf(['active', 'completed', 'cancelled']).default('active')
+  status: yup
+    .string()
+    .oneOf(['active', 'completed', 'cancelled'])
+    .default('active'),
 });
 
 const CreateEventForm = ({ organizerId, onSuccess, onClose }) => {
-  const { 
-    register, 
-    handleSubmit, 
-    formState: { errors }
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+    control,
   } = useForm({
     resolver: yupResolver(eventSchema),
-    defaultValues: {
-      isRemote: false,
-      status: 'active'
-    }
+    defaultValues: { isRemote: false, status: 'active', requiredSkills: [] },
   });
 
+  const [skillsOptions, setSkillsOptions] = useState([]);
   const [loading, setLoading] = useState(false);
   const [serverError, setServerError] = useState('');
+
+  useEffect(() => {
+    const fetchSkills = async () => {
+      try {
+        const res = await axios.get('/api/skills');
+        if (res.data.success) {
+          const groupedOptions = res.data.categories.map((cat) => ({
+            label: cat.name,
+            options: cat.skills.map((skill) => ({
+              value: skill.skillId,
+              label: skill.name,
+            })),
+          }));
+          setSkillsOptions(groupedOptions);
+        } else {
+          console.error('Failed to fetch skills');
+        }
+      } catch (error) {
+        console.error('Error fetching skills:', error);
+      }
+    };
+    fetchSkills();
+  }, []);
 
   const onSubmit = async (data) => {
     setLoading(true);
     setServerError('');
-    
 
     try {
       const formattedData = {
         ...data,
-        userId: organizerId, // your backend expects userId as organizer
+        userId: organizerId,
         startDate: format(new Date(data.startDate), 'yyyy-MM-dd'),
         endDate: format(new Date(data.endDate), 'yyyy-MM-dd'),
         isRemote: data.isRemote ? 1 : 0,
-        requiredSkill: data.requiredSkill || null,
+        requiredSkills: data.requiredSkills, 
       };
 
       const response = await createEvent(formattedData);
 
-      if (response.data.success) {
-        if (onSuccess) onSuccess(response.data.event);
+      if (response.success) {
+        if (onSuccess) onSuccess(response.event);
         if (onClose) onClose();
       } else {
-        setServerError(response.data.message || 'Failed to create event');
+        setServerError(response.message || 'Failed to create event');
       }
     } catch (error) {
-      console.error('Event creation error:', error);
       setServerError(error.response?.data?.message || 'Error creating event');
     } finally {
       setLoading(false);
@@ -75,11 +106,9 @@ const CreateEventForm = ({ organizerId, onSuccess, onClose }) => {
   return (
     <div className="bg-white p-6 rounded-lg shadow-xl max-w-lg mx-auto">
       <h2 className="text-2xl font-bold mb-6 text-gray-800">Create New Event</h2>
-      
+
       {serverError && (
-        <div className="mb-4 p-3 bg-red-100 text-red-700 rounded">
-          {serverError}
-        </div>
+        <div className="mb-4 p-3 bg-red-100 text-red-700 rounded">{serverError}</div>
       )}
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
@@ -100,37 +129,43 @@ const CreateEventForm = ({ organizerId, onSuccess, onClose }) => {
             className="w-full border rounded p-2"
             placeholder="Event Description"
           />
-          {errors.description && <p className="text-red-600">{errors.description.message}</p>}
+          {errors.description && (
+            <p className="text-red-600">{errors.description.message}</p>
+          )}
         </div>
 
         <div>
-          <label className="block font-semibold">Required Skill</label>
-          <input
-            type="text"
-            {...register('requiredSkill')}
-            className="w-full border rounded p-2"
-            placeholder="Enter required skill(s)"
+          <label className="block font-semibold">Required Skills</label>
+          <Controller
+            name="requiredSkills"
+            control={control}
+            render={({ field }) => (
+              <SkillSelector
+                skillsOptions={skillsOptions}
+                selectedSkills={skillsOptions
+                  .flatMap((group) => group.options)
+                  .filter((opt) => field.value.includes(opt.value))}
+                onChange={(selected) => {
+                  field.onChange(selected ? selected.map((s) => s.value) : []);
+                }}
+                placeholder="Select required skills"
+              />
+            )}
           />
-          {errors.requiredSkill && <p className="text-red-600">{errors.requiredSkill.message}</p>}
+          {errors.requiredSkills && (
+            <p className="text-red-600">{errors.requiredSkills.message}</p>
+          )}
         </div>
 
         <div>
           <label className="block font-semibold">Start Date</label>
-          <input
-            type="date"
-            {...register('startDate')}
-            className="w-full border rounded p-2"
-          />
+          <input type="date" {...register('startDate')} className="w-full border rounded p-2" />
           {errors.startDate && <p className="text-red-600">{errors.startDate.message}</p>}
         </div>
 
         <div>
           <label className="block font-semibold">End Date</label>
-          <input
-            type="date"
-            {...register('endDate')}
-            className="w-full border rounded p-2"
-          />
+          <input type="date" {...register('endDate')} className="w-full border rounded p-2" />
           {errors.endDate && <p className="text-red-600">{errors.endDate.message}</p>}
         </div>
 
@@ -145,12 +180,7 @@ const CreateEventForm = ({ organizerId, onSuccess, onClose }) => {
         </div>
 
         <div className="flex items-center">
-          <input
-            type="checkbox"
-            {...register('isRemote')}
-            className="mr-2"
-            id="isRemote"
-          />
+          <input type="checkbox" {...register('isRemote')} className="mr-2" id="isRemote" />
           <label htmlFor="isRemote">Remote Event</label>
         </div>
 
@@ -163,7 +193,9 @@ const CreateEventForm = ({ organizerId, onSuccess, onClose }) => {
             min={1}
             placeholder="Number of Volunteers"
           />
-          {errors.maxVolunteers && <p className="text-red-600">{errors.maxVolunteers.message}</p>}
+          {errors.maxVolunteers && (
+            <p className="text-red-600">{errors.maxVolunteers.message}</p>
+          )}
         </div>
 
         <div>
@@ -182,7 +214,7 @@ const CreateEventForm = ({ organizerId, onSuccess, onClose }) => {
             disabled={loading}
             className="bg-blue-600 text-white px-4 py-2 rounded"
           >
-            {loading ? "Creating..." : "Create Event"}
+            {loading ? 'Creating...' : 'Create Event'}
           </button>
           <button
             type="button"
@@ -199,3 +231,4 @@ const CreateEventForm = ({ organizerId, onSuccess, onClose }) => {
 };
 
 export default CreateEventForm;
+

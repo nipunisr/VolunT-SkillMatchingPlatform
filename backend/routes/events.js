@@ -1,27 +1,26 @@
+
+
 const express = require('express');
 const router = express.Router();
-const { 
-  getEventsByOrganizer, 
+const authMiddleware = require('../middleware/authMiddleware');
+const permit = require('../middleware/roleMiddleware');
+const {
   createEvent,
-  updateEvent,
-  deleteEvent,
-  getEventById
+  getEventById,
+  getEventsByOrganizer,
+  getEventSkills,
+  updateEventById,
+  getEvents,
+  getMatchingEvents,
 } = require('../controllers/eventsController');
-const authMiddleware = require('../middleware/auth');
 
-// GET all events for an organizer
-router.get('/organizer/:organizerId', authMiddleware, getEventsByOrganizer);
 
-// GET a single event by ID
-router.get('/:eventId', authMiddleware, getEventById);
-
-// POST create a new event
-router.post('/', authMiddleware, createEvent);
-
-// PUT update an existing event
-router.put('/:eventId', authMiddleware, updateEvent);
-
-// DELETE an event
-router.delete('/:eventId', authMiddleware, deleteEvent);
-
+router.get('/', getEvents);
+router.get('/matching', authMiddleware, getMatchingEvents);
+router.post('/', authMiddleware, permit('organizer'),createEvent);
+router.get('/:opportunityId', getEventById);
+router.get('/:opportunityId/skills', getEventSkills);
+router.put('/:opportunityId', authMiddleware, updateEventById);
+router.get('/organizer/:organizerId', authMiddleware, permit('organizer'), getEventsByOrganizer);
 module.exports = router;
+

@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState, useCallback } from 'react';
 import EventCard from '../components/EventCard';
 import CreateEventForm from '../components/CreateEventForm';
@@ -6,30 +7,23 @@ import image from '../assets/images/org-dash.png';
 import { useUserContext } from '../context/UserContext';
 
 const OrganizerDashboard = () => {
-  const { currentUser } = useUserContext();
-  const organizerId = currentUser?.id;
+  const { currentUser , loadingUser } = useUserContext();
+  const organizerId = currentUser?.userId;
 
   const [events, setEvents] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [showCreateForm, setShowCreateForm] = useState(false);
 
   const fetchEvents = useCallback(async () => {
     if (!organizerId) return;
-    
+
     setLoading(true);
     setError('');
-    
+
     try {
-      const response = await axios.get(
-        `http://localhost:5000/api/events/organizer/${organizerId}`,
-        {
-          headers: {
-            'Authorization': `Bearer ${localStorage.getItem('token')}`
-          }
-        }
-      );
-      
+      const response = await axios.get(`http://localhost:5000/api/events/organizer/${organizerId}`);
+
       if (response.data.success) {
         setEvents(response.data.events || []);
       } else {
@@ -44,8 +38,25 @@ const OrganizerDashboard = () => {
   }, [organizerId]);
 
   useEffect(() => {
-    fetchEvents();
-  }, [fetchEvents]);
+    
+    if (organizerId) {
+      fetchEvents();
+    }
+  }, [organizerId, fetchEvents]
+
+);
+
+  if ( loadingUser) {
+    return (
+      <div className="text-center py-8">
+        <p>Loading user information...</p>
+      </div>
+    );
+  }
+
+  if (!currentUser) {
+  return <p>Please log in</p>; 
+}
 
   return (
     <div className="bg-white min-h-screen">
@@ -113,10 +124,10 @@ const OrganizerDashboard = () => {
             <p>No events found. Click "Create an Event" to add your first event.</p>
           </div>
         ) : (
-          events.map(event => (
-            <EventCard 
-              key={event.opportunityId} 
-              event={event} 
+          events.map((event) => (
+            <EventCard
+              key={event.eventId} 
+              event={event}
               onDelete={fetchEvents}
             />
           ))

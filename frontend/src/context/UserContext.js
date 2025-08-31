@@ -1,56 +1,39 @@
-// // src/context/UserContext.js
-// import React, { createContext, useContext, useState } from 'react';
 
-// const UserContext = createContext();
-
-// export const UserProvider = ({ children }) => {
-//   const [currentUser, setCurrentUser] = useState(null);
-
-//   // You can add logic here to fetch/set current user
-
-//   return (
-//     <UserContext.Provider value={{ currentUser, setCurrentUser }}>
-//       {children}
-//     </UserContext.Provider>
-//   );
-// };
-
-// // Custom hook to consume the UserContext
-// export const useUserContext = () => {
-//   return useContext(UserContext);
-// };
-
-// export default UserProvider;
-
-
-// src/context/UserContext.js
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useContext, useState, useEffect } from 'react';
+import axios from 'axios';
 
 const UserContext = createContext();
 
 export const UserProvider = ({ children }) => {
   const [currentUser, setCurrentUser] = useState(null);
+  const [loadingUser, setLoadingUser] = useState(true);
 
-  // Load user from localStorage when app starts
   useEffect(() => {
-    const storedUser = localStorage.getItem('user');
-    if (storedUser) {
-      setCurrentUser(JSON.parse(storedUser));
-    }
+    const loadUserProfile = async () => {
+      try {
+        const token = localStorage.getItem('token');
+        if (!token) {
+          setLoadingUser(false);
+          return; 
+        }
+
+        const { data } = await axios.get('http://localhost:5000/api/profile', {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        setCurrentUser(data.user);
+      } catch (err) {
+        console.error('Failed to load profile', err);
+        setCurrentUser(null);
+      } finally {
+        setLoadingUser(false);
+      }
+    };
+
+    loadUserProfile();
   }, []);
 
-  const login = (userData) => {
-    localStorage.setItem('user', JSON.stringify(userData));
-    setCurrentUser(userData);
-  };
-
-  const logout = () => {
-    localStorage.removeItem('user');
-    setCurrentUser(null);
-  };
-
   return (
-    <UserContext.Provider value={{ currentUser, login, logout }}>
+    <UserContext.Provider value={{ currentUser, setCurrentUser, loadingUser }}>
       {children}
     </UserContext.Provider>
   );

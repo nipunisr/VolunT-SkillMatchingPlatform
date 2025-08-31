@@ -1,4 +1,6 @@
 
+const { query } = require('../config/db');
+
 const {
   UpdateUserById,
   GetListOfUsers,
@@ -16,7 +18,6 @@ const {
 const  GetAllUsers = async (req, res) => {
   const userList = await GetListOfUsers();
 
-  // DO SOMETHING WITH THE USER LIST OR JUST RETURN IT
   return res.json(userList);
 };
 
@@ -24,7 +25,6 @@ const GetUser = async (req, res) => {
   const userId = req.params.id;
   const user = await GetUserById(userId);
 
-  // DO SOMETHING WITH THE USER OR JUST RETURN IT
   return res.json(user);
 };
 
@@ -32,7 +32,6 @@ const DeleteUser = async (req, res) => {
   const userId = req.params.id;
   const user = await DeleteUserById(userId);
 
-  // DO SOMETHING WITH THE USER OR JUST RETURN IT
   return res.json(user);
 };
 
@@ -40,11 +39,8 @@ const AddUser = async (req, res) => {
   const user = req.body;
   console.log(user)
   const newUser = await AddNewUser(user);
-
-  // DO SOMETHING WITH THE USER OR JUST RETURN IT
   return res.json(newUser);
 };
-//const { updateUserAndChild } = require('../services/users');
 
 const updateUserProfile = async (req, res) => {
   const userId = req.params.userId;
@@ -65,8 +61,6 @@ const updateUserProfile = async (req, res) => {
     res.status(500).json({ success: false, message: err.message });
   }
 };
-
-
 
 const UpdateUser = async (req, res) => {
   const userId = req.params.id;
@@ -105,8 +99,6 @@ const UpdateProfile = async (req, res) => {
   }
 };
 
-
-
 const SendRequestController = async (req, res) => {
 try {
   const { message } = req.body;
@@ -114,9 +106,8 @@ try {
   const senderUserId = req.params.id;
   console.log(message)
   console.log("this is the id")
-  console.log(senderUserId)  // Assuming you have user information in the request
+  console.log(senderUserId)  
   console.log("this is the id")
-  // Call the SendMessage function passing the message and senderUserId
   const success = await SendMessage(message, senderUserId);
 console.log(success)
   if (success) {
@@ -130,8 +121,6 @@ console.log(success)
 
 }
 };
-
-
 
 const updateCredentials = async (req, res) => {
     const {id } = req.params;
@@ -151,7 +140,6 @@ const updateCredentials = async (req, res) => {
         res.status(500).send({ message: 'Error updating credentials' });
     }
 };
-
 
 
 module.exports = {

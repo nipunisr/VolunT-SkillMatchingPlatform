@@ -1,63 +1,194 @@
-import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
-import hand from '../assets/images/hand2hand.png';
-import { fetchOpportunities } from '../services/api';
 
-const HomePage = () => {
-  const [opportunities, setOpportunities] = useState([]);
-  const [location, setLocation] = useState('Colombo');
+import React, { useState, useEffect, useCallback } from 'react';
+import hand from '../assets/images/hand2hand.png';
+import EventCard from '../components/Ecards';
+import { fetchEvents, fetchMatchingEvents } from '../services/api';
+
+const VolunteerDashboard = () => {
+  const [events, setEvents] = useState([]);
+  const [matchingEvents, setMatchingEvents] = useState([]);
+  const [searchCriteria, setSearchCriteria] = useState('name');
+  const [keyword, setKeyword] = useState('');
+  const [mode, setMode] = useState('all');
+  const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState('matching');
+  const [userProfile, setUserProfile] = useState(null);
 
   useEffect(() => {
-    const loadOpportunities = async () => {
-      try {
-        const data = await fetchOpportunities({ location });
-        setOpportunities(data);
-      } catch (error) {
-        console.error("Failed to fetch opportunities:", error);
+    const profile = JSON.parse(localStorage.getItem('userProfile'));
+    setUserProfile(profile);
+  }, []);
+
+  const filterEventsByProfile = useCallback((events, profile) => {
+    if (!profile || !events || events.length === 0) return [];
+    
+    return events.filter(event => {
+      const locationMatch = event.isRemote || 
+                           !profile.location || 
+                           !event.location || 
+                           event.location.toLowerCase().includes(profile.location.toLowerCase());
+      
+      let dateMatch = true;
+      if (profile.availability && profile.availability.start && profile.availability.end && event.startDate) {
+        const eventDate = new Date(event.startDate);
+        const availableStart = new Date(profile.availability.start);
+        const availableEnd = new Date(profile.availability.end);
+        dateMatch = eventDate >= availableStart && eventDate <= availableEnd;
       }
-    };
-    loadOpportunities();
-  }, [location]);
+      
+      let skillsMatch = true;
+      if (profile.skills && profile.skills.length > 0 && event.requiredSkills) {
+        skillsMatch = profile.skills.some(skill => 
+          event.requiredSkills.includes(skill)
+        );
+      }
+      
+      return locationMatch && dateMatch && skillsMatch;
+    });
+  }, []);
+
+  const loadInitialEvents = useCallback(async () => {
+    setLoading(true);
+    try {
+      const allData = await fetchEvents({});
+      setEvents(allData);
+      
+      try {
+        const matchingData = await fetchMatchingEvents();
+        setMatchingEvents(matchingData);
+      } catch (matchingError) {
+        console.warn('Matching events API failed, using frontend filtering:', matchingError);
+        const profile = JSON.parse(localStorage.getItem('userProfile'));
+        if (profile) {
+          const filteredEvents = filterEventsByProfile(allData, profile);
+          setMatchingEvents(filteredEvents);
+        } else {
+          setMatchingEvents([]);
+        }
+      }
+    } catch (err) {
+      console.error('Failed to load events:', err);
+      setEvents([]);
+      setMatchingEvents([]);
+    }
+    setLoading(false);
+  }, [filterEventsByProfile]);
+
+  useEffect(() => {
+    loadInitialEvents();
+  }, [loadInitialEvents]);
+
+  const handleSearch = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    setActiveTab('all');
+    
+    try {
+      const filters = {};
+      if (searchCriteria === 'name') filters.keyword = keyword.trim();
+      else if (searchCriteria === 'location') filters.location = keyword.trim();
+      else if (searchCriteria === 'mode' && mode !== 'all') filters.eventType = mode;
+
+      const data = await fetchEvents(filters);
+      setEvents(data);
+    } catch (err) {
+      console.error('Search failed:', err);
+      setEvents([]);
+    }
+    setLoading(false);
+  };
+
+  const displayEvents = activeTab === 'matching' ? matchingEvents : events;
 
   return (
-    <div className="bg-white">
-      {/* Hero Section */}
+    <div className="bg-white min-h-screen">
+      {/* Hero Section and Search */}
       <section className="container flex flex-col items-center px-4 py-12 mx-auto md:py-16 md:flex-row">
         <div className="mb-8 md:w-1/2 md:mb-0">
-          <h1 className="text-4xl font-bold leading-tight text-[#29142C] md:text-5xl">
-            Matching The Best <span className="text-[#E17335]">Volunteering</span> <br/>Opportunities
+          <h1 className="text-4xl font-bold leading-tight text-[#29144C] md:text-5xl">
+            Find  <span className="text-[#E17335]">Volunteering</span><br />Opportunities
           </h1>
           <p className="mt-4 text-xl text-[#E17335]">Share Your Skills, Change the World</p>
-          
-          {/* Search Box */}
-          <div className="flex w-full max-w-md mt-8">
-            <div className="relative flex-grow">
-              <input
-                type="text"
-                value={location}
-                onChange={(e) => setLocation(e.target.value)}
-                className="w-full px-4 py-3 border border-gray-300 rounded-l-md focus:outline-none focus:ring-2 focus:ring-[#E17335] focus:border-transparent"
-              />
-              {location && (
-                <button 
-                  onClick={() => setLocation('')}
-                  className="absolute text-gray-400 transform -translate-y-1/2 right-3 top-1/2 hover:text-gray-600"
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" viewBox="0 0 20 20" fill="currentColor">
-                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
-                  </svg>
-                </button>
-              )}
-            </div>
-            <button 
-              onClick={() => {/* Trigger search */}}
-              className="px-6 py-3 text-sm font-medium text-white transition-colors bg-[#29142C] rounded-r-md hover:bg-purple-800"
+
+          {/* Tab Navigation */}
+          <div className="flex mt-6 border-b border-gray-200">
+            <button
+              className={`px-4 py-2 font-medium ${activeTab === 'matching' ? 'text-[#E17335] border-b-2 border-[#E17335]' : 'text-gray-500'}`}
+              onClick={() => setActiveTab('matching')}
             >
-              Find
+              Matching Events
+            </button>
+            <button
+              className={`px-4 py-2 font-medium ${activeTab === 'all' ? 'text-[#E17335] border-b-2 border-[#E17335]' : 'text-gray-500'}`}
+              onClick={() => setActiveTab('all')}
+            >
+              All Events
             </button>
           </div>
+          
+          {/* Info message for matching events */}
+          {activeTab === 'matching' && matchingEvents.length > 0 && (
+            <div className="mt-4 p-3 bg-blue-50 rounded-md">
+              <p className="text-sm text-blue-700">
+                Showing events that match your skills, location, and availability
+              </p>
+            </div>
+          )}
+          
+          {/* Guidance if no profile exists */}
+          {activeTab === 'matching' && !userProfile && (
+            <div className="mt-4 p-3 bg-yellow-50 rounded-md">
+              <p className="text-sm text-yellow-700">
+                Complete your profile to see personalized event matches
+              </p>
+            </div>
+          )}
+          
+          {/* Search Box */}
+          <form className="flex items-center space-x-2 mt-8 max-w-xl" onSubmit={handleSearch}>
+            {/* Search criteria dropdown */}
+            <select
+              value={searchCriteria}
+              onChange={(e) => setSearchCriteria(e.target.value)}
+              className="px-3 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#E17335]"
+            >
+              <option value="name">Name</option>
+              <option value="location">Location</option>
+              <option value="mode">Mode</option>
+            </select>
+
+            {/* Dynamic input based on criteria */}
+            {(searchCriteria === 'name' || searchCriteria === 'location') && (
+              <input
+                type="text"
+                placeholder={`Enter ${searchCriteria}`}
+                value={keyword}
+                onChange={e => setKeyword(e.target.value)}
+                className="flex-grow px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#E17335]"
+              />
+            )}
+
+            {searchCriteria === 'mode' && (
+              <select
+                value={mode}
+                onChange={e => setMode(e.target.value)}
+                className="px-7 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#E17335]"
+              >
+                <option value="all">All</option>
+                <option value="online">Online</option>
+                <option value="physical">Physical</option>
+              </select>
+            )}
+
+            <button
+              type="submit"
+              className="px-6 py-3 text-sm font-medium text-white transition-colors bg-[#29144C] rounded-md hover:bg-purple-900"
+            >
+              Search
+            </button>
+          </form>
         </div>
-        
+
         <div className="flex justify-center md:w-1/2">
           <div className="relative w-64 h-64 rounded-full md:w-80 md:h-80">
             <img
@@ -69,32 +200,35 @@ const HomePage = () => {
         </div>
       </section>
 
-      {/* Volunteer Cards Section */}
+      {/* Events Section */}
       <section className="py-12 bg-gray-50">
         <div className="container px-4 mx-auto">
-          <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {opportunities.map((opportunity) => (
-              <div key={opportunity.id} className="p-6 transition-shadow rounded-lg shadow-sm bg-purple-50 hover:shadow-md">
-                <h3 className="mb-3 text-xl font-semibold text-gray-800">{opportunity.title}</h3>
-                <p className="mb-4 text-gray-600 line-clamp-2">{opportunity.description}</p>
-                <div className="flex justify-between items-center">
-                  <span className="text-sm text-[#E17335]">
-                    {opportunity.location}
-                  </span>
-                  <Link 
-                    to={`/opportunities/${opportunity.id}`}
-                    className="text-sm font-medium text-[#E17335] hover:underline"
-                  >
-                    More
-                  </Link>
-                </div>
-              </div>
-            ))}
-          </div>
+          <h2 className="text-2xl font-bold text-[#29144C] mb-6">
+            {activeTab === 'matching' ? 'Events Matching Your Profile' : 'All Events'}
+          </h2>
+          
+          {loading ? (
+            <div className="text-center text-lg py-8">Loading events...</div>
+          ) : displayEvents.length === 0 ? (
+            <div className="text-center text-gray-500 py-8">
+              {activeTab === 'matching' 
+                ? userProfile 
+                  ? "No matching events found based on your profile. Try browsing all events instead." 
+                  : "Complete your profile to see personalized event matches."
+                : "No events found."}
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+              {displayEvents.map(event => (
+                <EventCard key={event.opportunityId || event.id} event={event} />
+              ))}
+            </div>
+          )}
         </div>
       </section>
+    
     </div>
   );
 };
 
-export default HomePage;
+export default VolunteerDashboard;

@@ -1,13 +1,12 @@
-// services/Auth.js
-//const pool = require('../config/db');
+
 const bcrypt = require('bcrypt');
-const { query } = require('../config/db'); // import the promisified query
+const { query } = require('../config/db'); 
 
 const LoginNow = async ({ email, password }) => {
   try {
-    // Use the promisified query, which returns rows directly
+    
     const rows = await query('SELECT * FROM users WHERE email = ?', [email]);
-    console.log('Rows:', rows); // should be an array of row objects
+    console.log('Rows:', rows); 
 
     const user = rows && rows.length ? rows[0] : undefined;
     console.log('User:', user);

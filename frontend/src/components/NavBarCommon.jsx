@@ -13,22 +13,13 @@ const NavBarCommon = () => {
           <img 
             src={logo} 
             alt="Volunteer Connect Logo"
-            className="w-28 h-28"
+            className="w-28 h-28 object-contain"
           />
         </Link>
         
         <div className="hidden text-xl font-medium space-x-11 md:flex">
           <Link to="/" className="font-medium text-[#E17335]">Home</Link>
-          <Link 
-            to={user ? (user.userType === 'volunteer' ? '/my-events' : '/my-opportunities') : '#'}
-            className="text-gray-700 hover:text-[#E17335] transition-colors"
-          >
-            {user ? (user.userType === 'volunteer' ? 'My Events' : 'My Opportunities') : 'My Events'}
-          </Link>
-          <Link to="/notifications" className="text-gray-700 hover:text-[#E17335] transition-colors">
-            Notifications
-          </Link>
-          <Link to="/about" className="text-gray-700 hover:text-[#E17335] transition-colors">
+          <Link to="/about-us" className="text-gray-700 hover:text-[#E17335] transition-colors">
             About Us
           </Link>
         </div>

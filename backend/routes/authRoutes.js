@@ -1,26 +1,20 @@
-// const express = require('express');
-// const router = express.Router();
-// const authController = require('../controllers/authController');
-// const { validateRegister } = require('../middleware/validation');
 
-// router.post('/register');
-// router.post('/verify-email', authController.verifyEmail);
-
-// module.exports = router;
 
 const express = require('express');
 const router = express.Router();
 const authController = require('../controllers/authController');
-const login = require('../controllers/Auth'); // Import the login function
 const { validateRegister } = require('../middleware/validation');
+const authMiddleware = require('../middleware/authMiddleware');
 
-// Registration Route
 router.post('/register', validateRegister, authController.register);
+router.post('/login', authController.login);
+router.post('/logout', (req, res) => {
+  res.clearCookie('token');
+  res.status(200).json({ message: 'Logged out' });
+});
 
-// Login Route (this is missing in your code!)
-router.post('/login', login.login);
-
-// Email Verification Route
-router.post('/verify-email', authController.verifyEmail);
+router.get('/me', authMiddleware, (req, res) => {
+  res.json({ success: true, user: req.user });
+});
 
 module.exports = router;
