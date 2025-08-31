@@ -55,7 +55,7 @@ const {
 
 // GET /api/events with optional filters: location, keyword
 router.get('/', getEvents);
-
+router.get('/matching', authMiddleware, getMatchingEvents);
 
 router.post('/', authMiddleware, permit('organizer'),createEvent);
 router.get('/:opportunityId', getEventById);
@@ -65,7 +65,8 @@ router.get('/:opportunityId/skills', getEventSkills);
 router.put('/:opportunityId', authMiddleware, updateEventById);
 router.get('/organizer/:organizerId', authMiddleware, permit('organizer'), getEventsByOrganizer);
 
-router.get('/matching', authMiddleware, getMatchingEvents);
+
+
 
 module.exports = router;
 
