@@ -1,7 +1,6 @@
 import React from 'react';
 
 const NotificationCard = ({ notification }) => {
-  // Function to determine background color based on notification type
   const getBgColor = (type) => {
     switch (type) {
       case 'registration':

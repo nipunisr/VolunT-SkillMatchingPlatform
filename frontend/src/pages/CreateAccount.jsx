@@ -2,10 +2,10 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { motion } from 'framer-motion';
-import { useUserContext } from '../context/UserContext'; // Assuming this exports a hook
+import { useUserContext } from '../context/UserContext'; 
 
 const CreateAccount = () => {
-  const { currentUser } = useUserContext(); // Correct usage of the hook
+  const { currentUser } = useUserContext(); 
   const navigate = useNavigate();
   const [error, setError] = useState('');
   const [showOrgField, setShowOrgField] = useState(false);
@@ -47,7 +47,7 @@ const CreateAccount = () => {
       newErrors.email = 'Email is invalid';
     }
 
-    if (!currentUser) { // Only validate password on registration
+    if (!currentUser) { 
       if (!formData.password) {
         newErrors.password = 'Password is required';
       } else if (formData.password.length < 6) {

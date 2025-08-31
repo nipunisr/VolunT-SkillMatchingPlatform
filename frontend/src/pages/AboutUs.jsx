@@ -14,7 +14,6 @@ const AboutUs = () => {
 
   return (
     <div className="p-8 min-h-screen bg-gradient-to-b from-gray-50 to-gray-100">
-      {/* Header */}
       <motion.h1
         initial={{ y: -50, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
@@ -34,7 +33,6 @@ const AboutUs = () => {
         Our mission is to empower communities through collaboration and shared purpose.
       </motion.p>
 
-      {/* Stats Section */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto ">
         {[
           { label: "Volunteers", value: stats.volunteers },
@@ -56,7 +54,6 @@ const AboutUs = () => {
         ))}
       </div>
 
-      {/* Team/Values Section */}
       <div className="mt-16 max-w-5xl mx-auto">
         <h2 className="text-2xl font-bold text-center mb-6 text-purple-900">Our Values</h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">

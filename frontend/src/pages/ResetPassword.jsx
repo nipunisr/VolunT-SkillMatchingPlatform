@@ -59,8 +59,7 @@ export const ResetPassword = () => {
   
       setIsLoading(true);
       try {
-        // API call would go here
-        await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate API call
+        await new Promise(resolve => setTimeout(resolve, 1000)); 
         navigate('/update-password');
       } catch (err) {
         setErrors({ submit: 'Failedpassword to update password. Please try again.' });

@@ -47,7 +47,6 @@ const Login = () => {
       [name]: value
     }));
     
-    // Clear the error when user starts typing
     if (errors[name]) {
       setErrors(prev => ({
         ...prev,
@@ -76,15 +75,13 @@ const Login = () => {
       const response = await loginUser(formData);
       const { user, token } = response.data;
 
-      // Save token and user separately for ease of use
       localStorage.setItem('token', token);
       localStorage.setItem('user', JSON.stringify(user));
 
-      // Redirect based on userType
       if (user.userType === 'organizer') {
         navigate('/organizer/dashboard');
       } else if (user.userType === 'volunteer') {
-        navigate('/volunteer/dashboard'); // or volunteer dashboard route
+        navigate('/volunteer/dashboard'); 
       }
     } catch (err) {
       setServerError(err.response?.data?.msg || 'Login failed.');

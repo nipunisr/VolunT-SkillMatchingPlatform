@@ -1,9 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { getEventById } from '../services/api'; // your existing API function
-
+import { getEventById } from '../services/api'; 
 const EventDetails = () => {
-  const { id } = useParams(); // get event ID from URL
+  const { id } = useParams(); 
   const [event, setEvent] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -26,7 +25,6 @@ const EventDetails = () => {
   return (
     <div className="max-w-6xl mx-auto p-8 min-h-screen bg-white">
       <div className="flex flex-col md:flex-row gap-6 items-start">
-        {/* Left: Event description */}
         <div className="flex-1 bg-gray-100 rounded-lg shadow p-8 mb-6 md:mb-0">
           <h2 className="text-3xl font-bold text-[#29142C] mb-2">{event.title}</h2>
           <div className="text-xl font-semibold text-gray-700 mb-4">{event.organizationName}</div>
@@ -48,7 +46,6 @@ const EventDetails = () => {
           </p>
         </div>
 
-        {/* Right: Sidebar with key info */}
         <aside className="w-full md:w-80 p-6 rounded-lg shadow bg-white flex flex-col space-y-4">
           <button className="py-3 bg-[#E17335] text-white font-semibold rounded-md hover:bg-[#29144C] transition">
             I Want To Help

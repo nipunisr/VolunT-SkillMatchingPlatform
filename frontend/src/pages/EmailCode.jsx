@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import emailcode from "../assets/images/emailcode.png";
 
-// Email Verification Form Component
 export const EmailCode = () => {
   const [verificationCode, setVerificationCode] = useState('');
   const navigate = useNavigate();
@@ -11,7 +10,6 @@ export const EmailCode = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    // Add your verification logic here
     navigate('/email-success');
   };
 

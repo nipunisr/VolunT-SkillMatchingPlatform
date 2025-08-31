@@ -1,144 +1,10 @@
-// import React, { useState, useEffect } from "react";
-// import { useParams } from "react-router-dom";
-// import { getEventById,getEventSkills } from "../services/api";
-// import { format, parseISO } from "date-fns";
-// import helping from "../assets/images/helping.png";
-
-// const EventDetails = () => {
-//   const { opportunityId } = useParams();
-//   const [event, setEvent] = useState(null);
-//   const [skills, setSkills] = useState([]);
-
-
-//   useEffect(() => {
-//     async function fetchEvent() {
-//       if (!opportunityId) return;
-//       try {
-//         const eventData = await getEventById(opportunityId);
-//         setEvent(eventData);
-
-//         const eventSkills = await getEventSkills(opportunityId);
-//         setSkills(eventSkills);
-//       } catch (error) {
-//         console.error("Failed to fetch event details", error);
-//       }
-//     }
-//     fetchEvent();
-//   }, [opportunityId]);
-
-//   if (!event) return <div>Loading...</div>;
-
-//   const groupedSkills = skills.reduce((acc, skill) => {
-//   if (!acc[skill.categoryName]) acc[skill.categoryName] = [];
-//   acc[skill.categoryName].push(skill);
-//   return acc;
-// }, {});
-
-//   return (
-//     <div className="max-w-5xl mx-auto bg-white shadow-xl rounded-2xl overflow-hidden font-sans">
-//       {/* Header */}
-//       <div className="h-56 bg-gray-200">
-//         <img
-//           src={helping}
-//           alt="Event"
-//           className="w-full h-full object-cover"
-//         />
-//       </div>
-
-//       {/* Content */}
-//       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 p-6">
-//         {/* Left Side - Event Details */}
-//         <div className="md:col-span-2 space-y-6">
-//           <h2 className="text-2xl font-bold text-orange-800">{event.title}</h2>
-
-//           <div>
-//             <h3 className="font-semibold text-orange-800">Description</h3>
-//             <p className="text-gray-700">{event.description || "No details"}</p>
-//           </div>
-
-//           <div>
-//             <h3 className="font-semibold text-orange-800">Dates</h3>
-//             <p>
-//               Start:{" "}
-//               {event.startDate
-//                 ? format(parseISO(event.startDate), "PPP p")
-//                 : "-"}
-//             </p>
-//             <p>
-//               End:{" "}
-//               {event.endDate ? format(parseISO(event.endDate), "PPP p") : "-"}
-//             </p>
-//           </div>
-
-//           <div>
-//             <h3 className="font-semibold text-orange-800">Location</h3>
-//             <p>{event.location}</p>
-//           </div>
-
-//           <div>
-//             <h3 className="font-semibold text-orange-800">Remote</h3>
-//             <p>{event.isRemote ? "Yes" : "No"}</p>
-//           </div>
-
-//           <div>
-//             <h3 className="font-semibold text-orange-800">Max Volunteers</h3>
-//             <p>{event.maxVolunteers || "N/A"}</p>
-//           </div>
-
-//           <div>
-//             <h3 className="font-semibold text-orange-800">Status</h3>
-//             <p>{event.status}</p>
-//           </div>
-//         </div>
-
-//         {/* Right Side - Organizer Info */}
-//         <div className="bg-gray-50 rounded-xl p-4 shadow-inner space-y-2">
-//           <h3 className="font-semibold text-orange-800 mb-2">🛠️ Skills Needed</h3>
-          
-//           {Object.keys(groupedSkills).length === 0 ? (
-//       <p className="text-gray-400 text-sm">No skills listed for this event.</p>
-//     ) : (
-//       Object.entries(groupedSkills).map(([category, skillsInCategory]) => (
-//         <div key={category}>
-//           <h4 className="text-pink-900 font-semibold mb-1">{category}</h4>
-//           <ul className="list-disc list-inside space-y-1">
-//             {skillsInCategory.map((skill) => (
-//               <li key={skill.skillId}>{skill.skillName}</li>
-//             ))}
-//           </ul>
-//         </div>
-//       ))
-//     )}
-//         </div>
-//         <div className="bg-gray-50 rounded-xl p-2 shadow-inner space-y-2">
-//           <h3 className="font-semibold text-orange-800">Organizer</h3>
-//           <p>User ID: {event.userId}</p>
-
-//           <div className="text-sm text-gray-600">
-//             <p>
-//               Created At:{" "}
-//               {event.createdAt
-//                 ? format(parseISO(event.createdAt), "PPP p")
-//                 : "-"}
-//             </p>
-//           </div>
-//         </div>
-//       </div>
-//     </div>
-//   );
-// };
-
-// export default EventDetails;
-
-
-
 
 import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { getEventById, updateEventById, getEventSkills } from "../services/api";
 import { format, parseISO } from "date-fns";
 import helping from "../assets/images/helping.png";
-import { FiEdit2 } from "react-icons/fi"; // import edit icon
+import { FiEdit2 } from "react-icons/fi"; 
 
 const EventDetails = () => {
   const { opportunityId } = useParams();
@@ -160,7 +26,6 @@ const EventDetails = () => {
     if (err.response?.status === 404) {
       setError('Event not found. It may have been deleted.');
     } else if (err.code === 'ERR_CANCELED') {
-      // Request was canceled/aborted - handle or ignore gracefully
       console.log('Request was canceled.');
     } else {
       setError(err.response?.data?.message || 'Update failed');
@@ -198,22 +63,16 @@ const EventDetails = () => {
 
   if (!event) return <div>Loading...</div>;
 
-  // Toggle the edit mode of a field
   const toggleEdit = (field) => {
     setEditFields((prev) => ({ ...prev, [field]: !prev[field] }));
     setError("");
   };
 
-  // Handle input changes
   const handleChange = (field, value) => {
     setFormState((prev) => ({ ...prev, [field]: value }));
   };
 
-  // Save a field update to backend
   
-
-
-  // Cancel editing: revert to original event data
   const cancelEdit = (field) => {
     setFormState((prev) => ({ ...prev, [field]: event[field] || "" }));
     toggleEdit(field);
@@ -231,7 +90,7 @@ const EventDetails = () => {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 p-6">
         {/* Left side - details */}
         <div className="md:col-span-2 space-y-6">
-          <h2 className="text-2xl font-bold text-orange-800">{event.title /* not editable */}</h2>
+          <h2 className="text-2xl font-bold text-orange-800">{event.title}</h2>
 
           {/* Description */}
           <EditableField
@@ -350,7 +209,6 @@ const EventDetails = () => {
           {skills.length === 0 ? (
             <p className="text-gray-400 text-sm">No skills listed for this event.</p>
           ) : (
-            // Group skills by category for display
             Object.entries(
               skills.reduce((acc, skill) => {
                 acc[skill.categoryName] = acc[skill.categoryName] || [];
@@ -383,7 +241,6 @@ const EventDetails = () => {
   );
 };
 
-// EditableField component handles both display and edit modes with inputs, selects or textarea
 const EditableField = ({
   label,
   value,

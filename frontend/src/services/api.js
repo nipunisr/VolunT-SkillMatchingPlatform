@@ -1,58 +1,19 @@
-// import axios from 'axios';
 
-// // Existing fetchOpportunities function
-// export const fetchOpportunities = async (filters = {}) => {
-//   const query = new URLSearchParams(filters).toString();
-//   const response = await fetch(`/api/opportunities?${query}`);
-//   if (!response.ok) throw new Error('Failed to fetch opportunities');
-//   return response.json();
-// };
-
-// export const loginUser = (formData) => {
-//   return axios.post('http://localhost:5000/api/auth/login', formData);
-// };
-
-
-// export const getProfile = async () => {
-//   const token = localStorage.getItem('token');
-//   const config = {
-//     headers: {
-//       Authorization: `Bearer ${token}`
-//     }
-//   };
-//   return await axios.get('/api/profile', config);
-// };
-
-// export const createEvent = async (eventData) => {
-//   const token = localStorage.getItem('token');
-//   const config = {
-//     headers: {
-//       Authorization: `Bearer ${token}`
-//     }
-//   };
-//   return axios.post('/api/events/create', eventData, config);
-// };
 
 
 import axios from 'axios';
-//axios.defaults.withCredentials = true;
 
-// Optional: Set base URL globally if you call same server URLs
-// axios.defaults.baseURL = 'http://localhost:5000';
-
-// Add a request interceptor to automatically add token in headers
 axios.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem('token'); // get token from localStorage
+    const token = localStorage.getItem('token'); 
     if (token) {
-      config.headers.Authorization = `Bearer ${token}`; // attach token
+      config.headers.Authorization = `Bearer ${token}`; 
     }
     return config;
   },
   (error) => Promise.reject(error)
 );
 
-// Your existing APIs:
 
 export const fetchOpportunities = async (filters = {}) => {
   const query = new URLSearchParams(filters).toString();
@@ -66,7 +27,6 @@ export const loginUser = (formData) => {
 };
 
 export const getProfile = () => {
-  // Now no need to pass headers manually, interceptor handles it
   return axios.get('http://localhost:5000/api/profile');
 
 };
@@ -87,10 +47,6 @@ export const getEventById = async (opportunityId) => {
   return response.data.event;
 };
 
-// export const updateEventById = async (opportunityId, updateData) => {
-//   const response = await axios.put(`http://localhost:5000/api/events/${opportunityId}`, updateData);
-//   return response.data.event;
-// };
 
 export const getEventSkills = async (opportunityId) => {
   const res = await fetch(`http://localhost:5000/api/events/${opportunityId}/skills`);
@@ -148,28 +104,24 @@ export const fetchMatchingEvents = async () => {
   try {
     const response = await axios.get('http://localhost:5000/api/events/matching');
     
-    // Handle different response formats
     if (Array.isArray(response.data)) {
-      return response.data; // If backend returns array directly
+      return response.data; 
     } else if (response.data && Array.isArray(response.data.events)) {
-      return response.data.events; // If backend returns {events: []}
+      return response.data.events; 
     } else {
       console.warn('Unexpected response format from matching events endpoint');
-      return await fetchEvents({}); // Fallback to all events
+      return await fetchEvents({}); 
     }
   } catch (error) {
     if (error.response && error.response.status === 404) {
       console.warn('Matching events endpoint not implemented, using client-side filtering');
       
       try {
-        // Get volunteer profile
         const profileResponse = await axios.get('http://localhost:5000/api/profile');
         const volunteer = profileResponse.data.user || profileResponse.data;
         
-        // Get all events
         const allEvents = await fetchEvents({});
         
-        // Filter events based on volunteer's profile
         return filterEventsByVolunteerProfile(allEvents, volunteer);
       } catch (fallbackError) {
         console.error('Failed to filter events client-side:', fallbackError);
@@ -177,22 +129,19 @@ export const fetchMatchingEvents = async () => {
       }
     }
     console.error('Error fetching matching events:', error);
-    return await fetchEvents({}); // Fallback to all events
+    return await fetchEvents({}); 
   }
 };
 
-// Enhanced client-side filtering function
 const filterEventsByVolunteerProfile = (events, volunteer) => {
   if (!volunteer || !events || events.length === 0) return events;
   
   return events.filter(event => {
-    // Filter by location (allow remote events or events in the same location)
     const locationMatch = event.isRemote || 
                          !volunteer.location || 
                          !event.location || 
                          event.location.toLowerCase().includes(volunteer.location.toLowerCase());
     
-    // Filter by date availability
     let dateMatch = true;
     if (volunteer.availabilityStart && volunteer.availabilityEnd && event.startDate) {
       const eventDate = new Date(event.startDate);
@@ -201,10 +150,8 @@ const filterEventsByVolunteerProfile = (events, volunteer) => {
       dateMatch = eventDate >= availableStart && eventDate <= availableEnd;
     }
     
-    // Filter by skills (if available)
     let skillsMatch = true;
     if (volunteer.skills && volunteer.skills.length > 0 && event.requiredSkills) {
-      // Check if volunteer has any of the required skills
       skillsMatch = volunteer.skills.some(skill => 
         event.requiredSkills.includes(skill)
       );
@@ -213,67 +160,3 @@ const filterEventsByVolunteerProfile = (events, volunteer) => {
     return locationMatch && dateMatch && skillsMatch;
   });
 };
-
-
-
-// export const fetchMatchingEvents = async () => {
-//   try {
-//     const response = await axios.get('http://localhost:5000/api/events/matching');
-//     return response.data.events || [];
-//   } catch (error) {
-//     if (error.response && error.response.status === 404) {
-//       console.warn('Matching events endpoint not implemented, using client-side filtering');
-      
-//       try {
-//         // Get volunteer profile
-//         const profileResponse = await axios.get('http://localhost:5000/api/profile');
-//         const volunteer = profileResponse.data.user;
-        
-//         // Get all events
-//         const allEvents = await fetchEvents({});
-        
-//         // Filter events based on volunteer's profile
-//         return filterEventsByVolunteerProfile(allEvents, volunteer);
-//       } catch (fallbackError) {
-//         console.error('Failed to filter events client-side:', fallbackError);
-//         return await fetchEvents({});
-//       }
-//     }
-//     console.error('Error fetching matching events:', error);
-//     return [];
-//   }
-// };
-
-// // Enhanced client-side filtering function
-// const filterEventsByVolunteerProfile = (events, volunteer) => {
-//   if (!volunteer) return events;
-  
-//   return events.filter(event => {
-//     // Filter by location (allow remote events or events in the same location)
-//     const locationMatch = event.isRemote || 
-//                          !volunteer.location || 
-//                          !event.location || 
-//                          event.location.toLowerCase().includes(volunteer.location.toLowerCase());
-    
-//     // Filter by date availability
-//     let dateMatch = true;
-//     if (volunteer.availabilityStart && volunteer.availabilityEnd && event.startDate) {
-//       const eventDate = new Date(event.startDate);
-//       const availableStart = new Date(volunteer.availabilityStart);
-//       const availableEnd = new Date(volunteer.availabilityEnd);
-//       dateMatch = eventDate >= availableStart && eventDate <= availableEnd;
-//     }
-    
-//     // Filter by skills (if available)
-//     let skillsMatch = true;
-//     if (volunteer.skills && volunteer.skills.length > 0 && event.skills) {
-//       // Check if event has any of the volunteer's skills
-//       skillsMatch = volunteer.skills.some(skill => 
-//         event.skills.includes(skill) || 
-//         (event.description && event.description.toLowerCase().includes(skill.toLowerCase()))
-//       );
-//     }
-    
-//     return locationMatch && dateMatch && skillsMatch;
-//   });
-// };

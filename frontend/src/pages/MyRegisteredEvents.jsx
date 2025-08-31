@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { format, parseISO } from 'date-fns';
-import { getMyRegisteredEvents } from '../services/api';  // Create this API helper
+import { getMyRegisteredEvents } from '../services/api';  
 
 const statusColors = {
   pending: 'orange',

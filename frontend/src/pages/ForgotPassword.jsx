@@ -35,8 +35,7 @@ export const RequestReset = () => {
 
     setIsLoading(true);
     try {
-      // API call would go here
-      await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 1000)); 
       navigate('/reset-password', { state: { email } });
     } catch (err) {
       setError('Failed to send verification code. Please try again.');

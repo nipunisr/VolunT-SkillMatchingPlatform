@@ -6,9 +6,9 @@ import EventCard from '../components/Ecards';
 
 const HomePage = () => {
    const [events, setEvents] = useState([]);
-    const [searchCriteria, setSearchCriteria] = useState('name'); // name, location, mode
+    const [searchCriteria, setSearchCriteria] = useState('name'); 
     const [keyword, setKeyword] = useState('');
-    const [mode, setMode] = useState('all'); // online, physical, all
+    const [mode, setMode] = useState('all'); 
     const [loading, setLoading] = useState(true);
   
 
@@ -35,7 +35,6 @@ const HomePage = () => {
   
     useEffect(() => {
       loadEvents();
-      // eslint-disable-next-line
     }, []);
   
     const handleSearch = (e) => {

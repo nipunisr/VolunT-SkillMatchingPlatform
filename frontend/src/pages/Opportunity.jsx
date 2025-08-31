@@ -8,15 +8,9 @@ const EventPage = () => {
 
   const handleSubmit = async (formData) => {
     try {
-      // Replace with your actual API call
-      // await axios.post('/api/volunteer-requests', { 
-      //   ...formData,
-      //   eventId: 'event-id-here' 
-      // });
       
       console.log('Form submitted:', formData);
       setIsModalOpen(false);
-      // Show success notification
       alert('Your request has been sent successfully!');
     } catch (error) {
       console.error('Error submitting volunteer request:', error);

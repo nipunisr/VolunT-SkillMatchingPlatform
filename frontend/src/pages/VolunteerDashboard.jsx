@@ -1,260 +1,3 @@
-// import React, { useState, useEffect,useCallback } from 'react';
-// import hand from '../assets/images/hand2hand.png';
-// import EventCard from '../components/Ecards';
-// import { fetchEvents, fetchMatchingEvents } from '../services/api';
-
-
-// const VolunteerDashboard = () => {
-//   const [events, setEvents] = useState([]);
-//   const [matchingEvents, setMatchingEvents] = useState([]);
-//   const [searchCriteria, setSearchCriteria] = useState('name'); // name, location, mode
-//   const [keyword, setKeyword] = useState('');
-//   const [mode, setMode] = useState('all'); // online, physical, all
-//   const [loading, setLoading] = useState(true);
-//   const [activeTab, setActiveTab] = useState('matching');
-
-//   const loadInitialEvents = useCallback(async () => {
-//     setLoading(true);
-//     try {
-//       // Load matching events
-//       const matchingData = await fetchMatchingEvents();
-//       setMatchingEvents(matchingData);
-      
-//       // Load all events
-//       const allData = await fetchEvents({});
-//       setEvents(allData);
-//     } catch (err) {
-//       console.error('Failed to load events:', err);
-//       setEvents([]);
-//       setMatchingEvents([]);
-//     }
-//     setLoading(false);
-//   }, []);
-
-//   useEffect(() => {
-//     loadInitialEvents();
-//   }, [loadInitialEvents]);
-
-//   const handleSearch = async (e) => {
-//     e.preventDefault();
-//     setLoading(true);
-//     setActiveTab('all');
-    
-//     try {
-//       const filters = {};
-//       if (searchCriteria === 'name') filters.keyword = keyword.trim();
-//       else if (searchCriteria === 'location') filters.location = keyword.trim();
-//       else if (searchCriteria === 'mode' && mode !== 'all') filters.eventType = mode;
-
-//       const data = await fetchEvents(filters);
-//       setEvents(data);
-//     } catch (err) {
-//       console.error('Search failed:', err);
-//       setEvents([]);
-//     }
-//     setLoading(false);
-//   };
-
-//   // Determine which events to display based on active tab
-//   const displayEvents = activeTab === 'matching' ? matchingEvents : events;
-
-
-
-// const filterEventsByProfile = (events, profile) => {
-//   if (!profile || !events || events.length === 0) return [];
-  
-//   return events.filter(event => {
-//     // Check location match
-//     const locationMatch = event.isRemote || 
-//                          !profile.location || 
-//                          !event.location || 
-//                          event.location.toLowerCase().includes(profile.location.toLowerCase());
-    
-//     // Check date availability
-//     let dateMatch = true;
-//     if (profile.availability && profile.availability.start && profile.availability.end && event.startDate) {
-//       const eventDate = new Date(event.startDate);
-//       const availableStart = new Date(profile.availability.start);
-//       const availableEnd = new Date(profile.availability.end);
-//       dateMatch = eventDate >= availableStart && eventDate <= availableEnd;
-//     }
-    
-//     // Check skills match
-//     let skillsMatch = true;
-//     if (profile.skills && profile.skills.length > 0 && event.requiredSkills) {
-//       skillsMatch = profile.skills.some(skill => 
-//         event.requiredSkills.includes(skill)
-//       );
-//     }
-    
-//     return locationMatch && dateMatch && skillsMatch;
-//   });
-// };
-
-
-
-
-//   // const handleSearch = async (e) => {
-//   //   e.preventDefault();
-//   //   setLoading(true);
-//   //   setActiveTab('all');
-    
-//   //   try {
-//   //     const filters = {};
-//   //     if (searchCriteria === 'name') filters.keyword = keyword.trim();
-//   //     else if (searchCriteria === 'location') filters.location = keyword.trim();
-//   //     else if (searchCriteria === 'mode' && mode !== 'all') filters.eventType = mode;
-
-//   //     const data = await fetchEvents(filters);
-//   //     setEvents(data);
-//   //   } catch (err) {
-//   //     console.error('Search failed:', err);
-//   //     setEvents([]);
-//   //   }
-//   //   setLoading(false);
-//   // };
-
-//   // const displayEvents = activeTab === 'matching' ? matchingEvents : events;
-
-
-//   return (
-//     <div className="bg-white min-h-screen">
-//       {/* Hero Section and Search */}
-//       <section className="container flex flex-col items-center px-4 py-12 mx-auto md:py-16 md:flex-row">
-//         <div className="mb-8 md:w-1/2 md:mb-0">
-//           <h1 className="text-4xl font-bold leading-tight text-[#29144C] md:text-5xl">
-//             Find  <span className="text-[#E17335]">Volunteering</span><br />Opportunities
-//           </h1>
-//           <p className="mt-4 text-xl text-[#E17335]">Share Your Skills, Change the World</p>
-
-//           {/* Tab Navigation */}
-//           <div className="flex mt-6 border-b border-gray-200">
-//             <button
-//               className={`px-4 py-2 font-medium ${activeTab === 'matching' ? 'text-[#E17335] border-b-2 border-[#E17335]' : 'text-gray-500'}`}
-//               onClick={() => setActiveTab('matching')}
-//             >
-//               Matching Events
-//             </button>
-//             <button
-//               className={`px-4 py-2 font-medium ${activeTab === 'all' ? 'text-[#E17335] border-b-2 border-[#E17335]' : 'text-gray-500'}`}
-//               onClick={() => setActiveTab('all')}
-//             >
-//               All Events
-//             </button>
-//           </div>
-//           {/* Info message for matching events */}
-//           {activeTab === 'matching' && matchingEvents.length > 0 && (
-//             <div className="mt-4 p-3 bg-blue-50 rounded-md">
-//               <p className="text-sm text-blue-700">
-//                 Showing events that match your skills, location, and availability
-//               </p>
-//             </div>
-//           )}
-          
-//            {/* Search Box */}
-//           <form className="flex items-center space-x-2 mt-8 max-w-xl" onSubmit={handleSearch}>
-//             {/* Search criteria dropdown */}
-//             <select
-//               value={searchCriteria}
-//               onChange={(e) => setSearchCriteria(e.target.value)}
-//               className="px-3 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#E17335]"
-//             >
-//               <option value="name">Name</option>
-//               <option value="location">Location</option>
-//               <option value="mode">Mode</option>
-//             </select>
-
-//             {/* Dynamic input based on criteria */}
-//             {(searchCriteria === 'name' || searchCriteria === 'location') && (
-//               <input
-//                 type="text"
-//                 placeholder={`Enter ${searchCriteria}`}
-//                 value={keyword}
-//                 onChange={e => setKeyword(e.target.value)}
-//                 className="flex-grow px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#E17335]"
-//               />
-//             )}
-
-//             {searchCriteria === 'mode' && (
-//               <select
-//                 value={mode}
-//                 onChange={e => setMode(e.target.value)}
-//                 className="px-7 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#E17335]"
-//               >
-//                 <option value="all">All</option>
-//                 <option value="online">Online</option>
-//                 <option value="physical">Physical</option>
-//               </select>
-//             )}
-
-//             <button
-//               type="submit"
-//               className="px-6 py-3 text-sm font-medium text-white transition-colors bg-[#29144C] rounded-md hover:bg-purple-900"
-//             >
-//               Search
-//             </button>
-//           </form>
-//         </div>
-
-//         <div className="flex justify-center md:w-1/2">
-//           <div className="relative w-64 h-64 rounded-full md:w-80 md:h-80">
-//             <img
-//               src={hand}
-//               alt="Volunteer hands"
-//               className="absolute inset-0 w-full h-full object-cover"
-//             />
-//           </div>
-//         </div>
-//       </section>
-
-//       {/* Events Section
-//       <section className="py-12 bg-gray-50">
-//         <div className="container px-4 mx-auto">
-//           {loading ? (
-//             <div className="text-center text-lg py-8">Loading events...</div>
-//           ) : events.length === 0 ? (
-//             <div className="text-center text-gray-500 py-8">No events found.</div>
-//           ) : (
-//             <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-//               {events.map(event => (
-//              <EventCard key={event.opportunityId || event.id} event={event} />
-//      ))}
-//             </div>
-//           )}
-//         </div>
-//       </section> */}
-
-//       {/* Events Section */}
-//       <section className="py-12 bg-gray-50">
-//         <div className="container px-4 mx-auto">
-//           <h2 className="text-2xl font-bold text-[#29144C] mb-6">
-//             {activeTab === 'matching' ? 'Events Matching Your Profile' : 'All Events'}
-//           </h2>
-          
-//           {loading ? (
-//             <div className="text-center text-lg py-8">Loading events...</div>
-//           ) : displayEvents.length === 0 ? (
-//             <div className="text-center text-gray-500 py-8">
-//               {activeTab === 'matching' 
-//                 ? "No matching events found based on your profile. Try browsing all events instead." 
-//                 : "No events found."}
-//             </div>
-//           ) : (
-//             <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-//               {displayEvents.map(event => (
-//                 <EventCard key={event.opportunityId || event.id} event={event} />
-//               ))}
-//             </div>
-//           )}
-//         </div>
-//       </section>
-//     </div>
-//   );
-// };
-
-// export default VolunteerDashboard;
-
-
 
 import React, { useState, useEffect, useCallback } from 'react';
 import hand from '../assets/images/hand2hand.png';
@@ -271,24 +14,20 @@ const VolunteerDashboard = () => {
   const [activeTab, setActiveTab] = useState('matching');
   const [userProfile, setUserProfile] = useState(null);
 
-  // Fetch user profile from localStorage
   useEffect(() => {
     const profile = JSON.parse(localStorage.getItem('userProfile'));
     setUserProfile(profile);
   }, []);
 
-  // Filter events based on user profile
   const filterEventsByProfile = useCallback((events, profile) => {
     if (!profile || !events || events.length === 0) return [];
     
     return events.filter(event => {
-      // Check location match
       const locationMatch = event.isRemote || 
                            !profile.location || 
                            !event.location || 
                            event.location.toLowerCase().includes(profile.location.toLowerCase());
       
-      // Check date availability
       let dateMatch = true;
       if (profile.availability && profile.availability.start && profile.availability.end && event.startDate) {
         const eventDate = new Date(event.startDate);
@@ -297,7 +36,6 @@ const VolunteerDashboard = () => {
         dateMatch = eventDate >= availableStart && eventDate <= availableEnd;
       }
       
-      // Check skills match
       let skillsMatch = true;
       if (profile.skills && profile.skills.length > 0 && event.requiredSkills) {
         skillsMatch = profile.skills.some(skill => 
@@ -312,17 +50,14 @@ const VolunteerDashboard = () => {
   const loadInitialEvents = useCallback(async () => {
     setLoading(true);
     try {
-      // Load all events
       const allData = await fetchEvents({});
       setEvents(allData);
       
-      // Try to get matching events from API first
       try {
         const matchingData = await fetchMatchingEvents();
         setMatchingEvents(matchingData);
       } catch (matchingError) {
         console.warn('Matching events API failed, using frontend filtering:', matchingError);
-        // If API fails, use frontend filtering as fallback
         const profile = JSON.parse(localStorage.getItem('userProfile'));
         if (profile) {
           const filteredEvents = filterEventsByProfile(allData, profile);
@@ -363,7 +98,6 @@ const VolunteerDashboard = () => {
     setLoading(false);
   };
 
-  // Determine which events to display based on active tab
   const displayEvents = activeTab === 'matching' ? matchingEvents : events;
 
   return (

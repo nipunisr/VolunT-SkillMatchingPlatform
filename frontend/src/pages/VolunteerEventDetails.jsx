@@ -1,69 +1,9 @@
-// import React, { useEffect, useState } from 'react';
-// import { useParams } from 'react-router-dom';
-// import axios from 'axios';
-
-// const EventDetails = () => {
-//   const { opportunityId } = useParams();
-//   const [event, setEvent] = useState(null);
-
-//   useEffect(() => {
-//     axios.get(`http://localhost:3000/api/events/${opportunityId}`)
-//       .then(res => {
-//       console.log('Loaded event:', res.data.event);
-//       setEvent(res.data.event);
-//     })
-//       .catch(err => console.error('Failed to load event details', err));
-//   }, [opportunityId]);
-
-//   if (!event) return <div>Loading...</div>;
-
-//   return (
-//     <div className="max-w-4xl mx-auto mt-10">
-//       <div className="flex flex-col md:flex-row gap-8">
-//         <div className="bg-gray-100 rounded-xl p-8 flex-1">
-//           <h2 className="text-2xl font-bold text-gray-800 mb-2">{event.title}</h2>
-//           {/* <div className="text-lg font-semibold mb-1">{event.organization}</div> */}
-//           <div className="italic text-gray-600 mb-2">{event.description}</div>
-//           <div className="text-gray-700">
-//             <span className="font-medium">Contact:</span> {event.contactEmail}
-//           </div>
-//         </div>
-
-//         <div className="bg-white rounded-xl border p-7 min-w-[270px]">
-//           <button className="bg-[#E17335] text-white font-bold py-2 px-4 rounded mb-6 w-full hover:bg-[#29144C]">
-//             I Want To Help
-//           </button>
-//           <div className="text-gray-700 mb-1"><span className="font-bold">E-Mail</span> - {event.contactEmail}</div>
-//           <div className="text-gray-700 mb-1"><span className="font-bold">Location</span> - {event.location}</div>
-//           <div className="text-gray-700 mb-1"><span className="font-bold">Contact</span> : {event.contactPhone}</div>
-//           <div className="text-gray-700 mb-1"><span className="font-bold">Type</span> : {event.type}</div>
-//           <div className="text-gray-700 mb-2">
-//             <span className="font-bold">Skills Required :</span>
-//             {/* <ul className="ml-4 list-disc">
-//               {event.requiredSkills.map((skill, i) => (<li key={i}>{skill}</li>))}
-//             </ul> */}
-
-
-//             <ul className="ml-4 list-disc">
-//              {(event.requiredSkills ?? []).map((skill, i) => (
-//            <li key={i}>{skill}</li>
-//             ))}
-//             </ul>
-//           </div>
-//         </div>
-//       </div>
-//     </div>
-//   );
-// };
-
-// export default EventDetails;
-
 
 
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { format, parseISO } from 'date-fns'; // make sure date-fns installed
-import { getEventById, getEventSkills, saveVolunteerRequest } from '../services/api'; // adjust path as needed
+import { format, parseISO } from 'date-fns'; 
+import { getEventById, getEventSkills, saveVolunteerRequest } from '../services/api'; 
 import helping from "../assets/images/helping.png";
 import VolunteerRequestModal from '../components/VolunteerRequestModal';
 
@@ -142,8 +82,6 @@ const EventDetails = () => {
       <div className="flex flex-col md:flex-row gap-8 ">
         <div className="bg-gray-100 rounded-xl p-8 flex-1">
           <h2 className="text-2xl font-bold text-gray-800 mb-2">{event.title}</h2>
-          {/* Uncomment if organization available */}
-          {/* <div className="text-lg font-semibold mb-1">{event.organization}</div> */}
           <div className="italic text-gray-600 mb-2">{formState.description}</div>
         
         </div>
@@ -169,14 +107,6 @@ const EventDetails = () => {
             <div className="text-gray-700 mb-1"><span className="font-bold">Status :</span> {formState.status || "N/A"}</div>
           <div className="text-gray-700 mb-2"><br/>
             <span className="font-bold">Skills Required :</span>
-            {/* <ul className="ml-4 list-disc">
-              {skills.length === 0 ? (
-                <li>No skills listed</li>
-              ) : (
-                skills.map((skill) => <li key={skill.skillId}>{skill.skillName}</li>)
-              )}
-            </ul> */}
-
             {Object.entries(groupedSkills).map(([category, skills]) => (
             <div key={category} className="ml-4 mb-4">
             <div className="font-semibold">{category}</div>

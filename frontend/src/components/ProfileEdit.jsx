@@ -25,7 +25,7 @@ const ProfileEdit = () => {
     try {
       await updateProfile(updatedData);
       alert('Profile updated successfully');
-      setProfile(updatedData); // Optionally refresh or update UI
+      setProfile(updatedData); 
     } catch {
       alert('Failed to update profile');
     }
@@ -34,7 +34,6 @@ const ProfileEdit = () => {
   if (loading) return <div>Loading...</div>;
   if (error) return <div>{error}</div>;
 
-  // Conditional rendering based on userType field
   if (profile.userType === 'volunteer') {
     return <VolunteerProfileEdit profile={profile} onUpdate={handleUpdate} />;
   } else if (profile.userType === 'organizer') {
