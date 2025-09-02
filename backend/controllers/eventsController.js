@@ -12,7 +12,8 @@ exports.createEvent = async (req, res) => {
     const {
       title,
       description,
-      requiredSkills, 
+      requiredSkills,
+      startDate,
       endDate,
       location,
       isRemote,
