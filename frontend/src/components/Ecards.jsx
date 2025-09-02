@@ -4,11 +4,26 @@ import { useNavigate } from 'react-router-dom';
 const EventCard = ({ event }) => {
   const navigate = useNavigate();
   const firstLetter = event.title?.charAt(0) || 'E';
-  const eventDate = new Date(event.startDate).toLocaleDateString();
+  const eventDate = event.startDate ? new Date(event.startDate).toLocaleDateString() : 'Flexible dates';
   const locationOrRemote = event.isRemote ? 'Remote' : event.location;
 
+  const getMatchColor = (percentage, tier) => {
+    if (tier === 'perfect' || percentage === 100) return 'bg-green-100 text-green-800 border-green-200';
+    if (tier === 'excellent' || percentage === 90) return 'bg-blue-100 text-blue-800 border-blue-200';
+    if (tier === 'good' || percentage === 30) return 'bg-yellow-100 text-yellow-800 border-yellow-200';
+    if (tier === 'fair' || percentage === 10) return 'bg-purple-100 text-purple-800 border-purple-200';
+    return 'bg-gray-100 text-gray-800 border-gray-200';
+  };
+
   return (
-    <div className="bg-white rounded-lg shadow-lg p-6 flex flex-col justify-between h-full transition-transform hover:scale-105">
+    <div className="bg-white rounded-lg shadow-lg p-6 flex flex-col justify-between h-full transition-transform hover:scale-105 relative">
+      {/* Match percentage badge */}
+      {event.matchPercentage !== undefined && (
+        <div className={`absolute top-4 right-4 px-3 py-1 rounded-full text-xs font-semibold border ${getMatchColor(event.matchPercentage, event.matchTier)}`}>
+          {event.matchPercentage}% Match
+        </div>
+      )}
+
       <div className="flex items-start space-x-4 mb-4">
         <div className="flex items-center justify-center w-12 h-12 rounded-full bg-[#29144C] text-white text-xl font-bold flex-shrink-0">
           {firstLetter}
@@ -22,19 +37,47 @@ const EventCard = ({ event }) => {
         </div>
       </div>
 
-      {event.matchingSkills && event.matchingSkills.length > 0 && (
+      {/* Match reason */}
+      {event.matchReason && (
+        <div className="mb-4 p-3 bg-gray-50 rounded-md">
+          <div className="text-xs text-gray-600">{event.matchReason}</div>
+        </div>
+      )}
+
+      {/* Match details */}
+      {event.matchDetails && (
         <div className="mb-4">
-          <div className="text-xs font-medium text-[#E17335] mb-1">Matches your skills:</div>
-          <div className="flex flex-wrap gap-1">
-            {event.matchingSkills.slice(0, 3).map((skill, index) => (
-              <span key={index} className="px-2 py-1 text-xs bg-orange-100 text-orange-800 rounded-full">
-                {skill}
-              </span>
-            ))}
-            {event.matchingSkills.length > 3 && (
-              <span className="px-2 py-1 text-xs bg-gray-100 text-gray-600 rounded-full">
-                +{event.matchingSkills.length - 3} more
-              </span>
+          <div className="text-xs font-medium text-[#E17335] mb-1">Match details:</div>
+          <div className="grid grid-cols-2 gap-2 text-xs text-gray-600">
+            {event.matchDetails.location && (
+              <div className="flex items-center">
+                <span className="w-2 h-2 bg-green-500 rounded-full mr-1"></span>
+                Location match
+              </div>
+            )}
+            {event.matchDetails.dates && (
+              <div className="flex items-center">
+                <span className="w-2 h-2 bg-green-500 rounded-full mr-1"></span>
+                Date match
+              </div>
+            )}
+            {event.matchDetails.exactSkills && (
+              <div className="flex items-center">
+                <span className="w-2 h-2 bg-green-500 rounded-full mr-1"></span>
+                Skills match
+              </div>
+            )}
+            {event.matchDetails.category && !event.matchDetails.exactSkills && (
+              <div className="flex items-center">
+                <span className="w-2 h-2 bg-blue-500 rounded-full mr-1"></span>
+                Category match
+              </div>
+            )}
+            {event.matchDetails.isRemote && (
+              <div className="flex items-center">
+                <span className="w-2 h-2 bg-purple-500 rounded-full mr-1"></span>
+                Remote event
+              </div>
             )}
           </div>
         </div>

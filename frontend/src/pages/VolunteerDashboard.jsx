@@ -1,8 +1,7 @@
-
 import React, { useState, useEffect, useCallback } from 'react';
 import hand from '../assets/images/hand2hand.png';
 import EventCard from '../components/Ecards';
-import { fetchEvents, fetchMatchingEvents } from '../services/api';
+import { fetchEvents, fetchMatchingEvents, filterEventsByVolunteerProfile } from '../services/api';
 
 const VolunteerDashboard = () => {
   const [events, setEvents] = useState([]);
@@ -13,38 +12,11 @@ const VolunteerDashboard = () => {
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('matching');
   const [userProfile, setUserProfile] = useState(null);
+  const [matchThreshold, setMatchThreshold] = useState(30); 
 
   useEffect(() => {
     const profile = JSON.parse(localStorage.getItem('userProfile'));
     setUserProfile(profile);
-  }, []);
-
-  const filterEventsByProfile = useCallback((events, profile) => {
-    if (!profile || !events || events.length === 0) return [];
-    
-    return events.filter(event => {
-      const locationMatch = event.isRemote || 
-                           !profile.location || 
-                           !event.location || 
-                           event.location.toLowerCase().includes(profile.location.toLowerCase());
-      
-      let dateMatch = true;
-      if (profile.availability && profile.availability.start && profile.availability.end && event.startDate) {
-        const eventDate = new Date(event.startDate);
-        const availableStart = new Date(profile.availability.start);
-        const availableEnd = new Date(profile.availability.end);
-        dateMatch = eventDate >= availableStart && eventDate <= availableEnd;
-      }
-      
-      let skillsMatch = true;
-      if (profile.skills && profile.skills.length > 0 && event.requiredSkills) {
-        skillsMatch = profile.skills.some(skill => 
-          event.requiredSkills.includes(skill)
-        );
-      }
-      
-      return locationMatch && dateMatch && skillsMatch;
-    });
   }, []);
 
   const loadInitialEvents = useCallback(async () => {
@@ -60,7 +32,7 @@ const VolunteerDashboard = () => {
         console.warn('Matching events API failed, using frontend filtering:', matchingError);
         const profile = JSON.parse(localStorage.getItem('userProfile'));
         if (profile) {
-          const filteredEvents = filterEventsByProfile(allData, profile);
+          const filteredEvents = filterEventsByVolunteerProfile(allData, profile);
           setMatchingEvents(filteredEvents);
         } else {
           setMatchingEvents([]);
@@ -72,7 +44,7 @@ const VolunteerDashboard = () => {
       setMatchingEvents([]);
     }
     setLoading(false);
-  }, [filterEventsByProfile]);
+  }, []);
 
   useEffect(() => {
     loadInitialEvents();
@@ -98,7 +70,11 @@ const VolunteerDashboard = () => {
     setLoading(false);
   };
 
-  const displayEvents = activeTab === 'matching' ? matchingEvents : events;
+  const filteredMatchingEvents = matchingEvents.filter(event => 
+    event.matchPercentage >= matchThreshold
+  );
+
+  const displayEvents = activeTab === 'matching' ? filteredMatchingEvents : events;
 
   return (
     <div className="bg-white min-h-screen">
@@ -126,21 +102,20 @@ const VolunteerDashboard = () => {
             </button>
           </div>
           
-          {/* Info message for matching events */}
-          {activeTab === 'matching' && matchingEvents.length > 0 && (
-            <div className="mt-4 p-3 bg-blue-50 rounded-md">
-              <p className="text-sm text-blue-700">
-                Showing events that match your skills, location, and availability
-              </p>
-            </div>
-          )}
-          
-          {/* Guidance if no profile exists */}
-          {activeTab === 'matching' && !userProfile && (
-            <div className="mt-4 p-3 bg-yellow-50 rounded-md">
-              <p className="text-sm text-yellow-700">
-                Complete your profile to see personalized event matches
-              </p>
+          {/* Match threshold slider for matching events */}
+          {activeTab === 'matching' && (
+            <div className="mt-4">
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Minimum Match: {matchThreshold}%
+              </label>
+              <input
+                type="range"
+                min="0"
+                max="100"
+                value={matchThreshold}
+                onChange={(e) => setMatchThreshold(parseInt(e.target.value))}
+                className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+              />
             </div>
           )}
           
@@ -226,7 +201,6 @@ const VolunteerDashboard = () => {
           )}
         </div>
       </section>
-    
     </div>
   );
 };

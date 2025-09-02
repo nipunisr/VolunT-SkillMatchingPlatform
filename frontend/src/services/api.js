@@ -97,12 +97,77 @@ export const getVolunteerRecommendations = async (volunteerId) => {
 };
 
 
+// export const fetchMatchingEvents = async () => {
+//   try {
+//     const response = await axios.get('http://localhost:5000/api/events/matching');
+    
+//     if (Array.isArray(response.data)) {
+//       return response.data; 
+//     } else if (response.data && Array.isArray(response.data.events)) {
+//       return response.data.events; 
+//     } else {
+//       console.warn('Unexpected response format from matching events endpoint');
+//       return await fetchEvents({}); 
+//     }
+//   } catch (error) {
+//     if (error.response && error.response.status === 404) {
+//       console.warn('Matching events endpoint not implemented, using client-side filtering');
+      
+//       try {
+//         const profileResponse = await axios.get('http://localhost:5000/api/profile');
+//         const volunteer = profileResponse.data.user || profileResponse.data;
+        
+//         const allEvents = await fetchEvents({});
+        
+//         return filterEventsByVolunteerProfile(allEvents, volunteer);
+//       } catch (fallbackError) {
+//         console.error('Failed to filter events client-side:', fallbackError);
+//         return await fetchEvents({});
+//       }
+//     }
+//     console.error('Error fetching matching events:', error);
+//     return await fetchEvents({}); 
+//   }
+// };
+
+// const filterEventsByVolunteerProfile = (events, volunteer) => {
+//   if (!volunteer || !events || events.length === 0) return events;
+  
+//   return events.filter(event => {
+//     const locationMatch = event.isRemote || 
+//                          !volunteer.location || 
+//                          !event.location || 
+//                          event.location.toLowerCase().includes(volunteer.location.toLowerCase());
+    
+//     let dateMatch = true;
+//     if (volunteer.availabilityStart && volunteer.availabilityEnd && event.startDate) {
+//       const eventDate = new Date(event.startDate);
+//       const availableStart = new Date(volunteer.availabilityStart);
+//       const availableEnd = new Date(volunteer.availabilityEnd);
+//       dateMatch = eventDate >= availableStart && eventDate <= availableEnd;
+//     }
+    
+//     let skillsMatch = true;
+//     if (volunteer.skills && volunteer.skills.length > 0 && event.requiredSkills) {
+//       skillsMatch = volunteer.skills.some(skill => 
+//         event.requiredSkills.includes(skill)
+//       );
+//     }
+    
+//     return locationMatch && dateMatch && skillsMatch;
+//   });
+// };
 
 
-
+// services/api.js
 export const fetchMatchingEvents = async () => {
   try {
-    const response = await axios.get('http://localhost:5000/api/events/matching');
+    const token = localStorage.getItem('token');
+    const response = await axios.get('http://localhost:5000/api/events/matching', {
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    });
     
     if (Array.isArray(response.data)) {
       return response.data; 
@@ -117,9 +182,14 @@ export const fetchMatchingEvents = async () => {
       console.warn('Matching events endpoint not implemented, using client-side filtering');
       
       try {
-        const profileResponse = await axios.get('http://localhost:5000/api/profile');
-        const volunteer = profileResponse.data.user || profileResponse.data;
+        const token = localStorage.getItem('token');
+        const profileResponse = await axios.get('http://localhost:5000/api/profile', {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
         
+        const volunteer = profileResponse.data.user || profileResponse.data;
         const allEvents = await fetchEvents({});
         
         return filterEventsByVolunteerProfile(allEvents, volunteer);
@@ -133,30 +203,55 @@ export const fetchMatchingEvents = async () => {
   }
 };
 
-const filterEventsByVolunteerProfile = (events, volunteer) => {
+export const filterEventsByVolunteerProfile = (events, volunteer) => {
   if (!volunteer || !events || events.length === 0) return events;
   
-  return events.filter(event => {
+  return events.map(event => {
+    // Location match
     const locationMatch = event.isRemote || 
                          !volunteer.location || 
                          !event.location || 
                          event.location.toLowerCase().includes(volunteer.location.toLowerCase());
     
-    let dateMatch = true;
+    // Availability match
+    let availabilityMatch = true;
     if (volunteer.availabilityStart && volunteer.availabilityEnd && event.startDate) {
       const eventDate = new Date(event.startDate);
       const availableStart = new Date(volunteer.availabilityStart);
       const availableEnd = new Date(volunteer.availabilityEnd);
-      dateMatch = eventDate >= availableStart && eventDate <= availableEnd;
+      availabilityMatch = eventDate >= availableStart && eventDate <= availableEnd;
     }
     
+    // Skills match 
     let skillsMatch = true;
+    let matchedSkillsCount = 0;
+    let requiredSkillsCount = 0;
+    
     if (volunteer.skills && volunteer.skills.length > 0 && event.requiredSkills) {
-      skillsMatch = volunteer.skills.some(skill => 
-        event.requiredSkills.includes(skill)
-      );
+      requiredSkillsCount = event.requiredSkills.length;
+      matchedSkillsCount = event.requiredSkills.filter(reqSkill => 
+        volunteer.skills.includes(reqSkill)
+      ).length;
+      skillsMatch = matchedSkillsCount > 0;
     }
     
-    return locationMatch && dateMatch && skillsMatch;
-  });
+    // Calculate match percentage
+    const matchPercentage = requiredSkillsCount > 0 
+      ? (matchedSkillsCount / requiredSkillsCount) * 100 
+      : 100;
+    
+    return {
+      ...event,
+      matchPercentage: Math.round(matchPercentage),
+      matchDetails: {
+        location: locationMatch,
+        availability: availabilityMatch,
+        skills: skillsMatch
+      }
+    };
+  }).filter(event => 
+    event.matchDetails.location && 
+    event.matchDetails.availability && 
+    event.matchDetails.skills
+  ).sort((a, b) => b.matchPercentage - a.matchPercentage);
 };

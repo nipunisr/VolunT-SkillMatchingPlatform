@@ -3,6 +3,7 @@ import hand from '../assets/images/hand2hand.png';
 import { fetchEvents } from '../services/api';
 import EventCard from '../components/Ecards';
 
+
 const HomePage = () => {
    const [events, setEvents] = useState([]);
     const [searchCriteria, setSearchCriteria] = useState('name'); 
