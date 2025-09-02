@@ -1,7 +1,7 @@
 import React, { useCallback,useState, useEffect } from 'react';
 import hand from '../assets/images/hand2hand.png';
 import { fetchEvents } from '../services/api';
-import EventCard from '../components/Ecards';
+import EventCard from '../components/EventCard';
 
 
 const HomePage = () => {
