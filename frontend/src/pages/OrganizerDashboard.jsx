@@ -2,6 +2,7 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import EventCard from '../components/EventCard';
 import CreateEventForm from '../components/CreateEventForm';
+import VolunteerSearch from '../components/VolunteerSearch';
 import axios from 'axios';
 import image from '../assets/images/org-dash.png';
 import { useUserContext } from '../context/UserContext';
@@ -14,6 +15,7 @@ const OrganizerDashboard = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [showCreateForm, setShowCreateForm] = useState(false);
+  const [showVolunteerSearch, setShowVolunteerSearch] = useState(false);
 
   const fetchEvents = useCallback(async () => {
     if (!organizerId) return;
@@ -77,6 +79,12 @@ const OrganizerDashboard = () => {
           >
             Create an Event +
           </button>
+          <button
+            className="bg-gradient-to-r from-green-600 to-green-800 text-white px-8 py-3 rounded-lg font-semibold hover:from-green-700 hover:to-green-900 transition-colors"
+            onClick={() => setShowVolunteerSearch(true)}
+          >
+            Search Volunteers
+          </button>
         </div>
       </div>
 
@@ -102,6 +110,22 @@ const OrganizerDashboard = () => {
           </div>
         </div>
       )}
+      {/* Volunteer Search Modal */}
+      {showVolunteerSearch && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50 p-4">
+          <div className="bg-white rounded-lg shadow-lg max-w-4xl w-full relative max-h-[90vh] overflow-y-auto">
+            <button
+              onClick={() => setShowVolunteerSearch(false)}
+              className="absolute top-2 right-2 text-gray-600 hover:text-gray-900 text-xl font-bold z-10"
+              aria-label="Close"
+            >
+              &times;
+            </button>
+            <VolunteerSearch onClose={() => setShowVolunteerSearch(false)} />
+          </div>
+        </div>
+      )}
+
 
       {/* Events List */}
       <div className="flex gap-6 flex-wrap justify-center px-4 py-8 container mx-auto">

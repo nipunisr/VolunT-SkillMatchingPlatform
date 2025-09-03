@@ -11,7 +11,7 @@ const volunteerEventRoutes = require('./routes/volunteerEvents');
 const organizerApplications = require('./routes/organizerApplications');
 const statsRoutes = require('./routes/statsRoutes');
 const recommendationRoutes = require('./routes/recommendations');
-
+const volunteerSearch= require('./routes/volunteerSearch');
 
 
 const app = express();
@@ -49,6 +49,7 @@ app.use('/api/volunteers', volunteerEventRoutes);
 app.use('/api/organizer', organizerApplications);
 app.use('/api/stats', statsRoutes);
 app.use('/api/recommendations', recommendationRoutes);
+app.use('/api/volunteers', volunteerSearch);
 
 
 pool.getConnection((err, connection) => {
