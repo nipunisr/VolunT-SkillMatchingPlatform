@@ -198,8 +198,8 @@ const EventDetails = () => {
            onChange={handleChange}
            onSave={saveField}
            onCancel={cancelEdit}
-           asSelect // This enables dropdown mode
-           selectOptions={['active', 'completed', 'cancelled']} // Enum values
+           asSelect 
+           selectOptions={['active', 'completed', 'cancelled']} 
            saving={savingField === "status"}
            />
            </div>
