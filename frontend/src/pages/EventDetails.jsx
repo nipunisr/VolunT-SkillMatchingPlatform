@@ -187,22 +187,24 @@ const EventDetails = () => {
             type="number"
             saving={savingField === "maxVolunteers"}
           />
-
           {/* Status */}
-          <EditableField
-            label="Status"
-            field="status"
-            value={formState.status}
-            editing={editFields.status}
-            editable
-            onToggle={() => toggleEdit("status")}
-            onChange={handleChange}
-            onSave={saveField}
-            onCancel={cancelEdit}
-            saving={savingField === "status"}
-          />
-        </div>
+           <EditableField
+           label="Status"
+           field="status"
+           value={formState.status}
+           editing={editFields.status}
+           editable
+           onToggle={() => toggleEdit("status")}
+           onChange={handleChange}
+           onSave={saveField}
+           onCancel={cancelEdit}
+           asSelect // This enables dropdown mode
+           selectOptions={['active', 'completed', 'cancelled']} // Enum values
+           saving={savingField === "status"}
+           />
+           </div>
 
+          
         {/* Right side - Skills and Organizer Info */}
         <div className="bg-gray-50 rounded-xl p-4 shadow-inner space-y-4">
           <h3 className="font-semibold text-orange-800 mb-2">🛠️ Skills Needed</h3>

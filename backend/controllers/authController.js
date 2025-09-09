@@ -80,17 +80,15 @@ exports.login = async (req, res) => {
     const loginResult = await LoginNow({ email, password });
 
     if (!loginResult.success) {
-      return res.status(401).json(loginResult); // Invalid credentials etc.
+      return res.status(401).json(loginResult); 
     }
 
-    // Check if user email is verified if you track that (add verify check)
-
-    // Generate JWT token with user ID and role
+    
     const token = jwt.sign(
   { 
     userId: loginResult.user.userId, 
     userType: loginResult.user.userType,
-    userName: loginResult.user.userName  // add userName here
+    userName: loginResult.user.userName  
   },
   process.env.JWT_SECRET,
   { expiresIn: '1d' }

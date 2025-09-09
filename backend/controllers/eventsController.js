@@ -137,25 +137,24 @@ exports.updateEventById = async (req, res) => {
 
 exports.getEvents = async (req, res) => {
   const { location, keyword, eventType } = req.query; 
-  let sql = 'SELECT * FROM events WHERE 1=1 ';
+  
+  let sql = `SELECT * FROM events WHERE status NOT IN ('cancelled', 'completed') `;
   const params = [];
 
- 
   if (location) {
     sql += 'AND location LIKE ? ';
     params.push(`%${location}%`);
   }
 
-  
   if (keyword) {
     sql += 'AND (title LIKE ? OR description LIKE ?) ';
     params.push(`%${keyword}%`, `%${keyword}%`);
   }
   
   if (eventType === 'online') {
-    sql += 'AND isRemote = 1 '; // online
+    sql += 'AND isRemote = 1 '; 
   } else if (eventType === 'physical') {
-    sql += 'AND isRemote = 0 '; // physical
+    sql += 'AND isRemote = 0 '; 
   }
 
   sql += 'ORDER BY startDate ASC';

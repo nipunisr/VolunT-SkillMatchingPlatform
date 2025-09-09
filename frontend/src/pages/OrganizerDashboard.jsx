@@ -80,7 +80,7 @@ const OrganizerDashboard = () => {
             Create an Event +
           </button>
           <button
-            className="bg-gradient-to-r from-green-600 to-green-800 text-white px-8 py-3 rounded-lg font-semibold hover:from-green-700 hover:to-green-900 transition-colors"
+            className="bg-gradient-to-r from-purple-900 to-purple-700 text-white px-8 py-3 rounded-lg font-semibold hover:from-green-700 hover:to-green-900 transition-colors"
             onClick={() => setShowVolunteerSearch(true)}
           >
             Search Volunteers
